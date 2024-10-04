@@ -3,7 +3,7 @@ import requests
 import json
 
 # Directly include the API key (replace with your actual API key)
-perplexity_api_key = "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"
+perplexity_api_key = "your_perplexity_api_key_here"
 
 def get_perplexity_response(prompt, api_key):
     url = "https://api.perplexity.ai/chat/completions"
@@ -14,7 +14,7 @@ def get_perplexity_response(prompt, api_key):
     data = {
         "model": "mistral-7b-instruct",
         "messages": [
-            {"role": "system", "content": "You are Patrick Geddes, the Scottish biologist, geographer, and town planner. Respond in character, using your knowledge and experiences. If asked about modern topics or events after your lifetime, politely explain that you can't comment on future events."},
+            {"role": "system", "content": """You are Patrick Geddes, the Scottish biologist, sociologist, geographer, and pioneering town planner (1854-1932). Respond in character, using your knowledge and experiences. When faced with modern topics or events that occurred after your lifetime, apply your principles and methods of thinking to these new scenarios. Use your interdisciplinary approach, your concept of 'synoptic vision', and your belief in the interconnectedness of social, economic, and environmental factors to speculate on how these modern issues might be understood or addressed. Draw parallels between the challenges of your time and contemporary issues, always emphasizing the importance of holistic thinking, civic engagement, and sustainable development. Remember your motto 'By leaves we live' and your belief in 'think globally, act locally' when considering modern problems."""},
             {"role": "user", "content": prompt}
         ]
     }
@@ -34,8 +34,8 @@ def get_perplexity_response(prompt, api_key):
 st.title("Chat with Patrick Geddes")
 
 st.markdown("""
-Patrick Geddes (1854-1932) was a Scottish biologist, geographer, and pioneering town planner. 
-He is known for his innovative thinking in urban planning and sociological studies.
+Patrick Geddes (1854-1932) was a Scottish biologist, sociologist, geographer, and pioneering town planner. 
+He is known for his innovative thinking in urban planning, environmental and social reform, and his interdisciplinary approach to understanding cities and human societies.
 """)
 
 # Initialize session state
@@ -43,7 +43,7 @@ if 'chat_history' not in st.session_state:
     st.session_state.chat_history = []
 
 # Check if API key is set
-if not perplexity_api_key or perplexity_api_key == "your_perplexity_api_key_here":
+if not perplexity_api_key or perplexity_api_key == "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":
     st.error("Please replace 'your_perplexity_api_key_here' with your actual Perplexity API key in the script.")
 else:
     # Chat interface
@@ -55,16 +55,16 @@ else:
 
     # Display chat history
     for i, (question, answer) in enumerate(st.session_state.chat_history):
-        st.text_area(f"You (Question {i+1}):", value=question, height=50, disabled=False)
-        st.text_area(f"Patrick Geddes (Answer {i+1}):", value=answer, height=200, disabled=False)
+        st.text_area(f"You (Question {i+1}):", value=question, height=50, disabled=True)
+        st.text_area(f"Patrick Geddes (Answer {i+1}):", value=answer, height=150, disabled=True)
         st.markdown("---")  # Add a separator between Q&A pairs
 
 # Display information about the app
 st.sidebar.header("About")
 st.sidebar.info(
     "This app uses Perplexity AI to simulate a conversation with Patrick Geddes, "
-    "the Scottish biologist, geographer, and town planner. Ask him about his work, "
-    "ideas, or life experiences!"
+    "the Scottish biologist, sociologist, geographer, and town planner. Ask him about his work, "
+    "ideas, or even modern issues - he'll approach them with his unique interdisciplinary perspective!"
 )
 
 # Add a footer
