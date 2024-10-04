@@ -1,9 +1,14 @@
-# geddes.py
 import streamlit as st
 import requests
 import json
-from config import PERPLEXITY_API_KEY
 
+# Try to get the API key from config.py, if it fails, look for it in Streamlit secrets
+try:
+    from config import PERPLEXITY_API_KEY
+except ImportError:
+    PERPLEXITY_API_KEY = st.secrets.get("PERPLEXITY_API_KEY")
+
+# Function to get response from Perplexity API
 def get_perplexity_response(prompt, api_key):
     url = "https://api.perplexity.ai/chat/completions"
     headers = {
@@ -31,8 +36,53 @@ def get_perplexity_response(prompt, api_key):
         print(f"Response content: {e.response.content if e.response else 'No response'}")
         return f"Error: API request failed - {str(e)}"
 
+# Custom CSS for reversed colors, adjusted typography, and improved text area visibility
+st.markdown("""
+<style>
+    body {
+        font-family: Georgia, serif;
+        background-color: #FF6B35;
+        color: black;
+    }
+    .stTextInput > div > div > input {
+        color: black;
+        background-color: white;
+    }
+    .stTextArea textarea {
+        color: black !important;
+        background-color: #FFE0D3 !important;
+        opacity: 1 !important;
+    }
+    .stButton > button {
+        color: #FF6B35;
+        background-color: white;
+        border: 2px solid #FF6B35;
+        border-radius: 0;
+        padding: 10px 20px;
+        font-weight: bold;
+        font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    }
+    h1 {
+        font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+        font-weight: bold;
+        color: #FF6B35;
+    }
+    h2, h3 {
+        font-family: Georgia, serif;
+        font-weight: bold;
+        color: black;
+    }
+    .stMarkdown {
+        color: black;
+    }
+    .sidebar .sidebar-content {
+        background-color: #f0f0f0;
+    }
+</style>
+""", unsafe_allow_html=True)
+
 # Streamlit UI
-st.title("Chat with Patrick Geddes")
+st.title("Chat with Patrick")
 
 st.markdown("""
 Patrick Geddes (1854-1932) was a Scottish biologist, sociologist, geographer, and pioneering town planner. 
@@ -44,8 +94,8 @@ if 'chat_history' not in st.session_state:
     st.session_state.chat_history = []
 
 # Check if API key is set
-if not PERPLEXITY_API_KEY or PERPLEXITY_API_KEY == "your_perplexity_api_key_here":
-    st.error("Please set your Perplexity API key in the config.py file.")
+if not PERPLEXITY_API_KEY:
+    st.error("Please set your Perplexity API key in the config.py file or Streamlit secrets.")
 else:
     # Chat interface
     user_input = st.text_input("You:", key="user_input")
@@ -56,8 +106,10 @@ else:
 
     # Display chat history
     for i, (question, answer) in enumerate(st.session_state.chat_history):
-        st.text_area(f"You (Question {i+1}):", value=question, height=50, disabled=False)
-        st.text_area(f"Patrick Geddes (Answer {i+1}):", value=answer, height=200, disabled=False)
+        st.markdown(f"**You (Question {i+1}):**")
+        st.text_area("", value=question, height=50, disabled=True, key=f"q{i}")
+        st.markdown(f"**Patrick Geddes (Answer {i+1}):**")
+        st.text_area("", value=answer, height=150, disabled=True, key=f"a{i}")
         st.markdown("---")  # Add a separator between Q&A pairs
 
 # Display information about the app
