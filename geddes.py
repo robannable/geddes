@@ -56,8 +56,8 @@ else:
 
     # Display chat history
     for i, (question, answer) in enumerate(st.session_state.chat_history):
-        st.text_area(f"You (Question {i+1}):", value=question, height=50, disabled=True)
-        st.text_area(f"Patrick Geddes (Answer {i+1}):", value=answer, height=150, disabled=True)
+        st.text_area(f"You (Question {i+1}):", value=question, height=50, disabled=False)
+        st.text_area(f"Patrick Geddes (Answer {i+1}):", value=answer, height=200, disabled=False)
         st.markdown("---")  # Add a separator between Q&A pairs
 
 # Display information about the app
