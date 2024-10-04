@@ -1,9 +1,8 @@
+# geddes.py
 import streamlit as st
 import requests
 import json
-
-# Directly include the API key (replace with your actual API key)
-perplexity_api_key = "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"
+from config import PERPLEXITY_API_KEY
 
 def get_perplexity_response(prompt, api_key):
     url = "https://api.perplexity.ai/chat/completions"
@@ -28,6 +27,8 @@ def get_perplexity_response(prompt, api_key):
         else:
             return "Error: Unexpected response format from API."
     except requests.RequestException as e:
+        print(f"Full error details: {e}")
+        print(f"Response content: {e.response.content if e.response else 'No response'}")
         return f"Error: API request failed - {str(e)}"
 
 # Streamlit UI
@@ -43,14 +44,14 @@ if 'chat_history' not in st.session_state:
     st.session_state.chat_history = []
 
 # Check if API key is set
-if not perplexity_api_key or perplexity_api_key == "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":
-    st.error("Please replace 'your_perplexity_api_key_here' with your actual Perplexity API key in the script.")
+if not PERPLEXITY_API_KEY or PERPLEXITY_API_KEY == "your_perplexity_api_key_here":
+    st.error("Please set your Perplexity API key in the config.py file.")
 else:
     # Chat interface
     user_input = st.text_input("You:", key="user_input")
     if st.button("Send"):
         if user_input:
-            response = get_perplexity_response(user_input, perplexity_api_key)
+            response = get_perplexity_response(user_input, PERPLEXITY_API_KEY)
             st.session_state.chat_history.append((user_input, response))
 
     # Display chat history
