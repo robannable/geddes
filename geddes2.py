@@ -1,12 +1,45 @@
 import streamlit as st
 import requests
 import json
+import os
 
 # Try to get the API key from config.py, if it fails, look for it in Streamlit secrets
 try:
     from config import PERPLEXITY_API_KEY
 except ImportError:
     PERPLEXITY_API_KEY = st.secrets.get("PERPLEXITY_API_KEY")
+
+# Logging functions
+def initialize_log_file():
+    log_file = "chat_logs.json"
+    if not os.path.exists(log_file):
+        with open(log_file, 'w') as f:
+            json.dump({}, f)
+    return log_file
+
+def update_chat_log(user_name, question, answer, log_file):
+    with open(log_file, 'r') as f:
+        logs = json.load(f)
+    
+    if user_name not in logs:
+        logs[user_name] = []
+    
+    logs[user_name].append({"question": question, "answer": answer})
+
+    with open(log_file, 'w') as f:
+        json.dump(logs, f)
+
+def get_chat_history(user_name, log_file):
+    with open(log_file, 'r') as f:
+        logs = json.load(f)
+
+    if user_name in logs:
+        return logs[user_name]
+    else:
+        return "No chat history found for this user."
+
+# Initialize log file
+log_file = initialize_log_file()
 
 # Function to get response from Perplexity API
 def get_perplexity_response(prompt, api_key):
@@ -92,17 +125,27 @@ He is known for his innovative thinking in urban planning, environmental and soc
 # Initialize session state
 if 'chat_history' not in st.session_state:
     st.session_state.chat_history = []
+if 'user_name' not in st.session_state:
+    st.session_state.user_name = ""
 
-# Check if API key is set
+# User name input
+if not st.session_state.user_name:
+    user_name = st.text_input("Please enter your name:")
+    if user_name:
+        st.session_state.user_name = user_name
+
+# Check if API key is set and user has entered their name
 if not PERPLEXITY_API_KEY:
     st.error("Please set your Perplexity API key in the config.py file or Streamlit secrets.")
-else:
+elif st.session_state.user_name:
     # Chat interface
     user_input = st.text_input("You:", key="user_input")
     if st.button("Send"):
         if user_input:
             response = get_perplexity_response(user_input, PERPLEXITY_API_KEY)
             st.session_state.chat_history.append((user_input, response))
+            # Log the conversation
+            update_chat_log(st.session_state.user_name, user_input, response, log_file)
 
     # Display chat history
     for i, (question, answer) in enumerate(st.session_state.chat_history):
@@ -111,6 +154,11 @@ else:
         st.markdown(f"**Patrick Geddes (Answer {i+1}):**")
         st.text_area("", value=answer, height=150, disabled=True, key=f"a{i}")
         st.markdown("---")  # Add a separator between Q&A pairs
+
+    # Option to view chat history
+    if st.button("View My Chat History"):
+        history = get_chat_history(st.session_state.user_name, log_file)
+        st.write(history)
 
 # Display information about the app
 st.sidebar.header("About")
@@ -122,4 +170,4 @@ st.sidebar.info(
 
 # Add a footer
 st.sidebar.markdown("---")
-st.sidebar.markdown("Created with Streamlit and Perplexity AI by Rob Annable")
+st.sidebar.markdown("Created with Streamlit and Perplexity AI")
