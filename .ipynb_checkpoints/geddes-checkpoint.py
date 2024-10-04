@@ -3,7 +3,7 @@ import requests
 import json
 
 # Directly include the API key (replace with your actual API key)
-perplexity_api_key = "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"
+perplexity_api_key = "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"
 
 def get_perplexity_response(prompt, api_key):
     url = "https://api.perplexity.ai/chat/completions"
