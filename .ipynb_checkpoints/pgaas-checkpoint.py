@@ -122,28 +122,32 @@ def get_perplexity_response(prompt, api_key):
         print(f"Response content: {e.response.content if e.response else 'No response'}")
         return f"Error: API request failed - {str(e)}"
 
-# Custom CSS for reversed colors, adjusted typography, and improved text area visibility
+# Custom CSS for improved visibility, dark theme compatibility, and reduced gap
 st.markdown("""
 <style>
     body {
         font-family: Georgia, serif;
-        background-color: #FF6B35;
-        color: black;
+        color: #333333;
+        background-color: #FFFFFF;
     }
     .stTextInput > div > div > input {
-        color: black;
-        background-color: white;
+        color: #333333;
+        background-color: #FFFFFF;
+        border: 2px solid #FF6B35;
+        border-radius: 5px;
     }
     .stTextArea textarea {
-        color: black !important;
-        background-color: #FFE0D3 !important;
+        color: #333333 !important;
+        background-color: #FFFFFF !important;
+        border: 2px solid #FF6B35;
+        border-radius: 5px;
         opacity: 1 !important;
     }
     .stButton > button {
-        color: #FF6B35;
-        background-color: white;
+        color: #FFFFFF;
+        background-color: #FF6B35;
         border: 2px solid #FF6B35;
-        border-radius: 0;
+        border-radius: 5px;
         padding: 10px 20px;
         font-weight: bold;
         font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
@@ -156,20 +160,44 @@ st.markdown("""
     h2, h3 {
         font-family: Georgia, serif;
         font-weight: bold;
-        color: black;
+        color: #333333;
     }
     .stMarkdown {
-        color: black;
+        color: #333333;
     }
     .sidebar .sidebar-content {
-        background-color: #f0f0f0;
+        background-color: #F0F0F0;
     }
-    .intro-section {
-        display: flex;
-        align-items: flex-start;
+    .intro-section > div {
+        padding-left: 0 !important;
+        padding-right: 0 !important;
     }
-    .intro-image {
-        margin-right: 3px;
+    .intro-text {
+        padding-left: 0 !important;
+        margin-left: -1rem !important;
+    }
+    /* Targeting the Streamlit column containing the text */
+    .css-1l269bu {
+        padding-left: 0 !important;
+    }
+    /* Dark theme adjustments */
+    @media (prefers-color-scheme: dark) {
+        body {
+            color: #FFFFFF;
+            background-color: #1E1E1E;
+        }
+        .stTextInput > div > div > input,
+        .stTextArea textarea {
+            color: #FFFFFF !important;
+            background-color: #333333 !important;
+            border-color: #FF6B35;
+        }
+        h2, h3, .stMarkdown {
+            color: #FFFFFF;
+        }
+        .sidebar .sidebar-content {
+            background-color: #2D2D2D;
+        }
     }
 </style>
 """, unsafe_allow_html=True)
@@ -178,7 +206,7 @@ st.markdown("""
 st.title("Chat with Patrick")
 
 # Introduction section with image
-col1, col2 = st.columns([1, 3])
+col1, col2 = st.columns([0.8, 3.2])  # Adjusted ratio
 with col1:
     try:
         st.image("patrick_geddes.jpg", width=100, output_format="PNG")
@@ -187,9 +215,11 @@ with col1:
         print(f"Error loading image: {e}")
 with col2:
     st.markdown("""
+    <div class="intro-text">
     Patrick Geddes (1854-1932) was a Scottish biologist, sociologist, geographer, and pioneering town planner. 
     He is known for his innovative thinking in urban planning, environmental and social reform, and his interdisciplinary approach to understanding cities and human societies.
-    """)
+    </div>
+    """, unsafe_allow_html=True)
 
 # Initialize session state
 if 'chat_history' not in st.session_state:
@@ -208,7 +238,7 @@ if not PERPLEXITY_API_KEY:
     st.error("Please set your Perplexity API key in the config.py file or Streamlit secrets.")
 elif st.session_state.user_name:
     # Chat interface
-    user_input = st.text_input("You:", key="user_input")
+    user_input = st.text_input("Your question:", key="user_input")
     if st.button("Send"):
         if user_input:
             response = get_perplexity_response(user_input, PERPLEXITY_API_KEY)
@@ -221,7 +251,7 @@ elif st.session_state.user_name:
         st.markdown(f"**You (Question {i+1}):**")
         st.text_area("", value=question, height=50, disabled=True, key=f"q{i}")
         st.markdown(f"**Patrick Geddes (Answer {i+1}):**")
-        st.text_area("", value=answer, height=150, disabled=True, key=f"a{i}")
+        st.text_area("", value=answer, height=250, disabled=True, key=f"a{i}")  # Increased to 250px
         st.markdown("---")  # Add a separator between Q&A pairs
 
     # Option to view chat history
@@ -231,11 +261,10 @@ elif st.session_state.user_name:
 
 # Display information about the app
 st.sidebar.header("About")
-st.sidebar.info(
-    "This app uses Perplexity AI to simulate a conversation with Patrick Geddes, "
-    "the Scottish biologist, sociologist, geographer, and town planner. Ask him about his work, "
-    "ideas, or even modern issues - he'll approach them with his unique interdisciplinary perspective!"
-)
+# Read about information from external file
+with open('about.txt', 'r') as file:
+    about_info = file.read().strip()
+st.sidebar.info(about_info)
 
 # Add a footer
 st.sidebar.markdown("---")
