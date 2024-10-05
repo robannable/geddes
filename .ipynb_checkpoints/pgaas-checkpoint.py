@@ -2,6 +2,8 @@ import streamlit as st
 import requests
 import json
 import os
+import csv
+from datetime import datetime
 
 # Try to get the API key from config.py, if it fails, look for it in Streamlit secrets
 try:
@@ -9,37 +11,83 @@ try:
 except ImportError:
     PERPLEXITY_API_KEY = st.secrets.get("PERPLEXITY_API_KEY")
 
-# Logging functions
-def initialize_log_file():
-    log_file = "chat_logs.json"
-    if not os.path.exists(log_file):
-        with open(log_file, 'w') as f:
-            json.dump({}, f)
-    return log_file
-
-def update_chat_log(user_name, question, answer, log_file):
-    with open(log_file, 'r') as f:
-        logs = json.load(f)
+def initialize_log_files():
+    csv_file = "chat_logs.csv"
+    json_file = "chat_logs.json"
     
-    if user_name not in logs:
-        logs[user_name] = []
+    if not os.path.exists(csv_file):
+        with open(csv_file, 'w', newline='') as f:
+            writer = csv.writer(f)
+            writer.writerow(['name', 'date', 'time', 'question', 'response'])
     
-    logs[user_name].append({"question": question, "answer": answer})
-
-    with open(log_file, 'w') as f:
-        json.dump(logs, f)
-
-def get_chat_history(user_name, log_file):
-    with open(log_file, 'r') as f:
-        logs = json.load(f)
-
-    if user_name in logs:
-        return logs[user_name]
+    if not os.path.exists(json_file):
+        with open(json_file, 'w') as f:
+            json.dump([], f)  # Initialize as an empty list
     else:
-        return "No chat history found for this user."
+        # Ensure existing file contains a list
+        with open(json_file, 'r+') as f:
+            try:
+                logs = json.load(f)
+                if not isinstance(logs, list):
+                    logs = []
+                    f.seek(0)
+                    json.dump(logs, f)
+                    f.truncate()
+            except json.JSONDecodeError:
+                logs = []
+                f.seek(0)
+                json.dump(logs, f)
+                f.truncate()
+    
+    return csv_file, json_file
 
-# Initialize log file
-log_file = initialize_log_file()
+def update_chat_logs(user_name, question, response, csv_file, json_file):
+    now = datetime.now()
+    date = now.strftime("%Y-%m-%d")
+    time = now.strftime("%H:%M:%S")
+    
+    # Update CSV log
+    with open(csv_file, 'a', newline='') as f:
+        writer = csv.writer(f)
+        writer.writerow([user_name, date, time, question, response])
+    
+    # Update JSON log
+    with open(json_file, 'r+') as f:
+        try:
+            logs = json.load(f)
+            if not isinstance(logs, list):
+                logs = []
+        except json.JSONDecodeError:
+            logs = []
+        
+        logs.append({
+            "name": user_name,
+            "date": date,
+            "time": time,
+            "question": question,
+            "response": response
+        })
+        f.seek(0)
+        json.dump(logs, f, indent=4)
+        f.truncate()
+
+def get_chat_history(user_name, csv_file):
+    history = []
+    with open(csv_file, 'r') as f:
+        reader = csv.reader(f)
+        next(reader)  # Skip header row
+        for row in reader:
+            if row[0] == user_name:
+                history.append({
+                    "date": row[1],
+                    "time": row[2],
+                    "question": row[3],
+                    "response": row[4]
+                })
+    return history
+
+# Initialize log files
+csv_file, json_file = initialize_log_files()
 
 # Function to get response from Perplexity API
 def get_perplexity_response(prompt, api_key):
@@ -48,10 +96,15 @@ def get_perplexity_response(prompt, api_key):
         "Authorization": f"Bearer {api_key}",
         "Content-Type": "application/json"
     }
+    
+    # Read the character prompt from the external file
+    with open('patrick_prompt.txt', 'r') as file:
+        character_prompt = file.read().strip()
+    
     data = {
         "model": "mistral-7b-instruct",
         "messages": [
-            {"role": "system", "content": """You are Patrick Geddes, the Scottish biologist, sociologist, geographer, and pioneering town planner (1854-1932). Respond in character, using your knowledge and experiences. When faced with modern topics or events that occurred after your lifetime, apply your principles and methods of thinking to these new scenarios. Use your interdisciplinary approach, your concept of 'synoptic vision', and your belief in the interconnectedness of social, economic, and environmental factors to speculate on how these modern issues might be understood or addressed. Draw parallels between the challenges of your time and contemporary issues, always emphasizing the importance of holistic thinking, civic engagement, and sustainable development. Remember your motto 'By leaves we live' and your belief in 'think globally, act locally' when considering modern problems."""},
+            {"role": "system", "content": character_prompt},
             {"role": "user", "content": prompt}
         ]
     }
@@ -111,16 +164,32 @@ st.markdown("""
     .sidebar .sidebar-content {
         background-color: #f0f0f0;
     }
+    .intro-section {
+        display: flex;
+        align-items: flex-start;
+    }
+    .intro-image {
+        margin-right: 3px;
+    }
 </style>
 """, unsafe_allow_html=True)
 
 # Streamlit UI
 st.title("Chat with Patrick")
 
-st.markdown("""
-Patrick Geddes (1854-1932) was a Scottish biologist, sociologist, geographer, and pioneering town planner. 
-He is known for his innovative thinking in urban planning, environmental and social reform, and his interdisciplinary approach to understanding cities and human societies.
-""")
+# Introduction section with image
+col1, col2 = st.columns([1, 3])
+with col1:
+    try:
+        st.image("patrick_geddes.jpg", width=100, output_format="PNG")
+    except Exception as e:
+        st.write("Image not available")
+        print(f"Error loading image: {e}")
+with col2:
+    st.markdown("""
+    Patrick Geddes (1854-1932) was a Scottish biologist, sociologist, geographer, and pioneering town planner. 
+    He is known for his innovative thinking in urban planning, environmental and social reform, and his interdisciplinary approach to understanding cities and human societies.
+    """)
 
 # Initialize session state
 if 'chat_history' not in st.session_state:
@@ -145,7 +214,7 @@ elif st.session_state.user_name:
             response = get_perplexity_response(user_input, PERPLEXITY_API_KEY)
             st.session_state.chat_history.append((user_input, response))
             # Log the conversation
-            update_chat_log(st.session_state.user_name, user_input, response, log_file)
+            update_chat_logs(st.session_state.user_name, user_input, response, csv_file, json_file)
 
     # Display chat history
     for i, (question, answer) in enumerate(st.session_state.chat_history):
@@ -157,7 +226,7 @@ elif st.session_state.user_name:
 
     # Option to view chat history
     if st.button("View My Chat History"):
-        history = get_chat_history(st.session_state.user_name, log_file)
+        history = get_chat_history(st.session_state.user_name, csv_file)
         st.write(history)
 
 # Display information about the app
