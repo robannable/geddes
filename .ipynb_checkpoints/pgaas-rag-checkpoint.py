@@ -259,8 +259,7 @@ with col1:
 with col2:
     st.markdown("""
     <div class="intro-text">
-    Patrick Geddes (1854-1932) was a Scottish biologist, sociologist, geographer, and pioneering town planner. 
-    He is known for his innovative thinking in urban planning, environmental and social reform, and his interdisciplinary approach to understanding cities and human societies.
+    Patrick Geddes (1854-1932) was a Scottish biologist, sociologist, geographer, and pioneering town planner known for innovative thinking in urban planning, environmental and social reform.<br><br> Enter your name below and ask him a question...
     </div>
     """, unsafe_allow_html=True)
 
