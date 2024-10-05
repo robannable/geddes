@@ -1,3 +1,5 @@
+Re-animating historical figures, or phoning a friend.
+
 This app uses Perplexity AI to simulate a conversation with Patrick Geddes, the Scottish biologist, sociologist, geographer, and town planner. Ask him about his work, ideas, or even modern issues - he'll approach them with his unique interdisciplinary perspective!
 
 Created for BCU L6 students by Rob Annable.
