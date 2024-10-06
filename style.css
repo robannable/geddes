@@ -1,0 +1,153 @@
+body {
+    background-color: #f2f0e8;
+    margin-top: 30px;
+    padding: 5px;
+    width: 70%;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+ @font-face {
+  font-family: 'chunk';
+    src: url(fonts/ChunkFive-Regular.woff) format('woff');
+  
+}
+
+
+  h1 {
+    font-size: 2.2em;
+    font-family: "Helvetica", sans-serif;
+    margin-bottom: 0.6em;
+  }
+
+  h2 {
+    font-size: 1.5em;
+    font-family: "Helvetica", sans-serif;
+    margin-bottom: 1em;
+  }
+
+  h3 {
+    font-size: 1.1em;
+    font-family: Georgia, serif;
+    text-align: right;
+  }
+
+  h4 {
+    font-size: 0.95em;
+    font-family: Georgia, serif;
+    text-align: right;
+  }
+
+  p {
+    text-indent: 0px;
+    font-family: Georgia, serif;
+    font-weight: normal; 
+    font-size: 1.05em;
+    line-height: 165%;
+  }
+
+  p.footer {
+    font-family: "Helvetica", sans-serif;
+    font-weight: normal; 
+    font-size: 0.9em;
+    line-height: 110%;
+    text-align: center;
+  }
+
+  p.note {
+    text-indent: 0px;
+    font-family: Georgia, serif;
+   font-weight: normal; 
+    font-size: small;
+    text-align: right;
+}
+
+  p.footnotes {
+    text-indent: 0px;
+    font-family: Georgia, serif;
+   font-weight: normal; 
+    font-size: small;
+    text-align: left;
+}
+
+  li {
+    font-family:  Georgia, serif;
+    font-weight: normal; 
+    font-size: 0.95em;
+    line-height: 160%;
+  }
+
+  figcaption.fig-l {
+    font-family: "Arial", sans-serif;
+    font-weight: bold; 
+    font-size: small;
+    text-align: left;
+    line-height: 150%;
+    font-style: italic;
+    color: grey;
+    /*clear: both;*/
+  }
+
+  figcaption.fig-r {
+    font-family: "Arial", sans-serif;
+    font-weight: bold; 
+    font-size: small;
+    text-align: right;
+    line-height: 150%;
+    font-style: italic;
+    color: grey;
+    /*clear: both;*/
+  }
+
+  img.fig-l {
+    float: left;
+    margin: 0 1em 0.7em 0;
+    width: 27%;
+  }
+
+  img.fig-r {
+    float: right;
+    margin: 0 0 0.7em 1em;
+    width: 27%;
+  }
+
+  img.full {
+    float: center;
+    width: 80%;
+  }
+
+    figcaption.fig-full {
+    font-family: "Arial", sans-serif;
+    font-weight: bold; 
+    font-size: x-small;
+    line-height: 150%;
+    font-style: italic;
+    color: grey;
+    /*clear: both;*/
+  }
+
+  a {
+    text-decoration: underline;
+    color: indianred;
+  }
+
+  a:hover, a:visited {
+    color: deeppink;
+  }
+
+  mark {
+  font-weight: normal; 
+    background-color: #fbae17;
+}
+
+sup {
+  font-style: italic;
+  font-weight: lighter;
+  color: black;
+  background-color: #f2f2f2;
+}
+
+hr.dashed {
+  border-top: 1px dashed grey;
+  margin-top: 45px;
+}
