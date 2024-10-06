@@ -4,7 +4,7 @@ import json
 import os
 import csv
 from datetime import datetime
-from PyPDF2 import PdfReader
+from pypdf import PdfReader
 from langchain.text_splitter import CharacterTextSplitter
 
 # Get the directory of the current script
