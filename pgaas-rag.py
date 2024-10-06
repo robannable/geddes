@@ -31,10 +31,10 @@ def get_patrick_prompt():
 def get_about_info():
     try:
         with open(about_file_path, 'r') as file:
-            return file.read().strip()
+            return file.read().strip(), True  # Return the content and a flag indicating it contains HTML
     except FileNotFoundError:
         print(f"Warning: '{about_file_path}' not found. Using default about info.")
-        return "This app uses Perplexity AI to simulate a conversation with Patrick Geddes..."
+        return "This app uses Perplexity AI to simulate a conversation with Patrick Geddes...", False
 
 def load_documents(directory='documents'):
     texts = []
@@ -144,7 +144,7 @@ def get_perplexity_response(prompt, api_key, document_chunks):
     character_prompt = get_patrick_prompt()
     
     data = {
-        "model": "mistral-7b-instruct",
+        "model": "llama-3.1-70b-instruct",
         "messages": [
             {"role": "system", "content": character_prompt},
             {"role": "user", "content": f"Context: {context}\n\nQuestion: {prompt}"}
@@ -216,7 +216,7 @@ st.markdown("""
     }
     .intro-text {
         padding-left: 0 !important;
-        margin-left: -1rem !important;
+        margin-left: -0.5rem !important;
         color: black;
     }
     /* Targeting the Streamlit column containing the text */
@@ -252,14 +252,14 @@ st.title("Chat with Patrick")
 col1, col2 = st.columns([0.8, 3.2])
 with col1:
     try:
-        st.image("images/patrick_geddes.jpg", width=100, output_format="PNG")
+        st.image("images/patrick_geddes.jpg", width=130, output_format="JPG")
     except Exception as e:
         st.write("Image not available")
         print(f"Error loading image: {e}")
 with col2:
     st.markdown("""
     <div class="intro-text">
-    Patrick Geddes (1854-1932) was a Scottish biologist, sociologist, geographer, and pioneering town planner known for innovative thinking in urban planning, environmental and social reform.<br><br> Enter your name below and ask him a question...
+    Greetings, dear inquirer! I am Patrick Geddes, a man of many hats - biologist, sociologist, geographer, and yes, a bit of a revolutionary in the realm of town planning, if I do say so myself.<br><br>Now, my eager student, what's your name? And more importantly, what burning question about our shared world shall we explore together? Remember, "By leaves we live" - so let your curiosity bloom and ask away!
     </div>
     """, unsafe_allow_html=True)
 
@@ -303,7 +303,12 @@ elif st.session_state.user_name:
 
 # Display information about the app
 st.sidebar.header("About")
-st.sidebar.info(get_about_info())
+about_content, is_html = get_about_info()
+if is_html:
+    st.sidebar.markdown(about_content, unsafe_allow_html=True)
+else:
+    st.sidebar.info(about_content)
+
 
 # Add a footer
 st.sidebar.markdown("---")
