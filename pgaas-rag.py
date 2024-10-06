@@ -45,7 +45,7 @@ def load_documents(directory='documents'):
                 pdf_reader = PdfReader(file)
                 for page in pdf_reader.pages:
                     texts.append(page.extract_text())
-        elif filename.endswith('.txt'):
+        elif filename.endswith(('.txt', '.md')):
             with open(filepath, 'r', encoding='utf-8') as file:
                 texts.append(file.read())
     
