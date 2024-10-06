@@ -163,7 +163,7 @@ def get_perplexity_response(prompt, api_key, document_chunks, model):
         ]
     }
     
-   try:
+    try:
         response = requests.post(url, headers=headers, json=data)
         response.raise_for_status()
         response_json = response.json()
@@ -173,7 +173,7 @@ def get_perplexity_response(prompt, api_key, document_chunks, model):
             return f"Error: Unexpected response format from API. Full response: {response_json}"
     except requests.RequestException as e:
         return f"Error: API request failed - {str(e)}. Response content: {e.response.content if e.response else 'No response'}"
-
+        
 # Custom CSS for improved visibility, dark theme compatibility, and proper formatting
 st.markdown("""
 <style>
