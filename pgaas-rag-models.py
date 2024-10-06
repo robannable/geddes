@@ -264,7 +264,7 @@ st.title("Chat with Patrick")
 col1, col2 = st.columns([0.8, 3.2])
 with col1:
     try:
-        st.image("images/patrick-geddes.jpg", width=100, output_format="PNG")
+        st.image("images/patrick_geddes.jpg", width=100, output_format="PNG")
     except Exception as e:
         st.write("Image not available")
         print(f"Error loading image: {e}")
