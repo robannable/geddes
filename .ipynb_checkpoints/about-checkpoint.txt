@@ -1,5 +1,5 @@
 <em>Re-animating historical figures, or phoning a friend.</em>
 
-This project uses a Large Language Model (LLM) to simulate a conversation with Patrick Geddes, the Scottish biologist, sociologist, geographer, and town planner. Responses are a combination of knowledge present in the model and documents related to Geddes' work and associated texts.
+This project uses a Large Language Model (LLM) to simulate a conversation with a renowned historical figure. Responses are a combination of knowledge present in the model's dataset and documents related to their work and associated texts, using Retrieval Augmented Generation (RAG) to fine tune the knowledge base.
 
-Coded with the assistance of AI, it connects to the Perplexity API. Full details available at the <a href="https://github.com/robannable/geddes">Github repository</a>.
+Coded with the assistance of <a href="https://www.perplexity.ai/">Perplexity AI and API service</a>. Full details available at the <a href="https://github.com/robannable/geddes">Github repository</a>.
