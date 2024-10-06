@@ -22,9 +22,11 @@ except ImportError:
 
 # Available models
 AVAILABLE_MODELS = [
-    "mistral-7b-instruct",
+    "llama-3.1-sonar-small-128k-online",
+    "llama-3.1-sonar-small-128k-chat",
     "llama-3.1-sonar-large-128k-online",
     "llama-3.1-sonar-large-128k-chat",
+    "llama-3.1-8b-instruct",
     "llama-3.1-70b-instruct"
 ]
 
@@ -65,8 +67,8 @@ def load_documents(directory='documents'):
 document_chunks = load_documents()
 
 def initialize_log_files():
-    csv_file = os.path.join(script_dir, "chat_logs.csv")
-    json_file = os.path.join(script_dir, "chat_logs.json")
+    csv_file = os.path.join(script_dir, "chat_logs_models.csv")
+    json_file = os.path.join(script_dir, "chat_logs_models.json")
     
     if not os.path.exists(csv_file):
         with open(csv_file, 'w', newline='') as f:
@@ -134,7 +136,7 @@ def get_chat_history(user_name, csv_file):
                     "time": row[2],
                     "question": row[3],
                     "response": row[4],
-                    "model": row[5]
+                    "model": row[5] if len(row) > 5 else "Unknown"
                 })
     return history
 
@@ -171,7 +173,7 @@ def get_perplexity_response(prompt, api_key, document_chunks, model):
             return f"Error: Unexpected response format from API. Full response: {response_json}"
     except requests.RequestException as e:
         return f"Error: API request failed - {str(e)}. Response content: {e.response.content if e.response else 'No response'}"
-        
+
 # Custom CSS for improved visibility, dark theme compatibility, and proper formatting
 st.markdown("""
 <style>
@@ -260,7 +262,7 @@ st.title("Chat with Patrick")
 col1, col2 = st.columns([0.8, 3.2])
 with col1:
     try:
-        st.image("images/patrick_geddes.jpg", width=100, output_format="PNG")
+        st.image("patrick-geddes.jpg", width=100, output_format="PNG")
     except Exception as e:
         st.write("Image not available")
         print(f"Error loading image: {e}")
@@ -296,22 +298,27 @@ elif st.session_state.user_name:
     if st.button("Send"):
         if user_input:
             response = get_perplexity_response(user_input, PERPLEXITY_API_KEY, document_chunks, selected_model)
-            st.session_state.chat_history.append((user_input, response))
+            st.session_state.chat_history.append((user_input, response, selected_model))
             # Log the conversation
             update_chat_logs(st.session_state.user_name, user_input, response, csv_file, json_file, selected_model)
 
     # Display chat history
-    for i, (question, answer) in enumerate(st.session_state.chat_history):
+    for i, (question, answer, model) in enumerate(st.session_state.chat_history):
         st.markdown(f"**You (Question {i+1}):**")
         st.text_area("", value=question, height=50, disabled=True, key=f"q{i}")
-        st.markdown(f"**Patrick Geddes (Answer {i+1}):**")
+        st.markdown(f"**Patrick Geddes (Answer {i+1}, Model: {model}):**")
         st.text_area("", value=answer, height=250, disabled=True, key=f"a{i}")
         st.markdown("---")
 
     # Option to view chat history
     if st.button("View My Chat History"):
         history = get_chat_history(st.session_state.user_name, csv_file)
-        st.write(history)
+        for entry in history:
+            st.write(f"Date: {entry['date']}, Time: {entry['time']}")
+            st.write(f"Question: {entry['question']}")
+            st.write(f"Response: {entry['response']}")
+            st.write(f"Model: {entry['model']}")
+            st.markdown("---")
 
 # Display information about the app
 st.sidebar.header("About")
