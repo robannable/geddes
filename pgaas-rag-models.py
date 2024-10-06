@@ -25,9 +25,9 @@ AVAILABLE_MODELS = [
     "mistral-7b-instruct",
     "mixtral-8x7b-instruct",
     "sonar-small-chat",
+    "sonar-small-online",
     "sonar-medium-chat",
-    "claude-3-opus",
-    "claude-3-sonnet"
+    "sonar-medium-online"
 ]
 
 def get_patrick_prompt():
