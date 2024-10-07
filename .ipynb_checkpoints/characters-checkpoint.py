@@ -50,7 +50,7 @@ def load_documents(directory='documents'):
         elif filename.endswith(('.txt', '.md')):
             with open(filepath, 'r', encoding='utf-8') as file:
                 texts.append(file.read())
-    text_splitter = CharacterTextSplitter(chunk_size=1000, chunk_overlap=0)
+    text_splitter = CharacterTextSplitter(chunk_size=1000, chunk_overlap=100)
     chunks = text_splitter.split_text('\n'.join(texts))
     return chunks
 
