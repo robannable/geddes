@@ -10,4 +10,4 @@ PGaaS* seeks to embody this concept by offering users the opportunity to "conver
 Reference:
 De Cruz, H. 'Friendship with the ancients', Journal of the American Philosophical Association.
 
-*Patrick Geddes as a Service
+*Patrick Geddes As A Service
