@@ -257,9 +257,16 @@ if st.button('Show Chat History'):
     history = get_chat_history(user_name_input, csv_file)
     for entry in history:
         st.markdown(f"""
-        **User:** {entry['question']}
-        **Patrick Geddes:** {entry['response']}
-        **Sources:** {entry['unique_files']}
-        **Chunks used:** {entry['chunk_info']}
-        ---
+        <div style="background-color: #f0f0f0; padding: 10px; border-radius: 5px; margin-bottom: 10px;">
+        <p style="color: #1e90ff; font-weight: bold;">Name: {entry['name']}</p>
+        <p style="color: #32cd32; font-weight: bold;">Date: {entry['date']} | Time: {entry['time']}</p>
+        <p style="color: #ff4500; font-weight: bold;">User:</p>
+        <p>{entry['question']}</p>
+        <p style="color: #9932cc; font-weight: bold;">Patrick Geddes:</p>
+        <p>{entry['response']}</p>
+        <p style="color: #008080; font-weight: bold;">Sources:</p>
+        <p>{entry['unique_files']}</p>
+        <p style="color: #daa520; font-weight: bold;">Chunks used:</p>
+        <p>{entry['chunk_info']}</p>
+        </div>
         """, unsafe_allow_html=True)
