@@ -11,6 +11,7 @@ from PIL import Image
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 import numpy as np
+import html
 
 # Get the directory of the current script
 script_dir = os.path.dirname(os.path.abspath(__file__))
@@ -59,7 +60,7 @@ def load_documents(directory='documents'):
             image = Image.open(filepath)
             text = pytesseract.image_to_string(image)
             texts.append((text, filename))
-    
+
     text_splitter = CharacterTextSplitter(chunk_size=1000, chunk_overlap=100)
     chunks_with_filenames = [(chunk, filename) for text, filename in texts for chunk in text_splitter.split_text(text)]
     return chunks_with_filenames
@@ -80,12 +81,12 @@ def initialize_log_files():
     os.makedirs(logs_dir, exist_ok=True)
     csv_file = os.path.join(logs_dir, "response_log.csv")
     json_file = os.path.join(logs_dir, "response_log.json")
-    
+
     if not os.path.exists(csv_file):
         with open(csv_file, 'w', newline='') as f:
             writer = csv.writer(f)
             writer.writerow(['name', 'date', 'time', 'question', 'response', 'unique_files', 'chunk_info'])
-    
+
     if not os.path.exists(json_file):
         with open(json_file, 'w') as f:
             json.dump([], f)
@@ -100,7 +101,7 @@ def initialize_log_files():
             f.seek(0)
             json.dump(logs, f)
             f.truncate()
-    
+
     return csv_file, json_file
 
 def update_chat_logs(user_name, question, response, unique_files, chunk_info, csv_file, json_file):
@@ -108,9 +109,12 @@ def update_chat_logs(user_name, question, response, unique_files, chunk_info, cs
     date = now.strftime("%Y-%m-%d")
     time = now.strftime("%H:%M:%S")
     
+    # Encode HTML content
+    encoded_response = html.escape(response)
+    
     with open(csv_file, 'a', newline='') as f:
         writer = csv.writer(f)
-        writer.writerow([user_name, date, time, question, response, unique_files, chunk_info])
+        writer.writerow([user_name, date, time, question, encoded_response, unique_files, chunk_info])
     
     with open(json_file, 'r+') as f:
         try:
@@ -119,15 +123,17 @@ def update_chat_logs(user_name, question, response, unique_files, chunk_info, cs
                 logs = []
         except json.JSONDecodeError:
             logs = []
+        
         logs.append({
             "name": user_name,
             "date": date,
             "time": time,
             "question": question,
-            "response": response,
+            "response": encoded_response,
             "unique_files": unique_files,
             "chunk_info": chunk_info
         })
+        
         f.seek(0)
         json.dump(logs, f, indent=4)
         f.truncate()
@@ -138,13 +144,13 @@ def get_chat_history(user_name, csv_file):
         reader = csv.reader(f)
         next(reader)  # Skip header row
         for row in reader:
-            if row[0] == user_name:  # Ensure this matches the correct index for user name
+            if row[0] == user_name:
                 history.append({
                     "name": row[0],
                     "date": row[1],
                     "time": row[2],
                     "question": row[3],
-                    "response": row[4],
+                    "response": html.unescape(row[4]),  # Decode HTML content
                     "unique_files": row[5],
                     "chunk_info": row[6]
                 })
@@ -165,14 +171,17 @@ def get_perplexity_response(prompt, api_key):
     context_chunks_with_filenames = [document_chunks_with_filenames[i] for i in top_indices]
     context_chunks = [chunk for chunk, _ in context_chunks_with_filenames]
     context_filenames_list = [filename for _, filename in context_chunks_with_filenames]
+    
     context_text = "\n".join(context_chunks)
-
+    
     url = "https://api.perplexity.ai/chat/completions"
     headers = {
         "Authorization": f"Bearer {api_key}",
         "Content-Type": "application/json"
     }
+    
     character_prompt = get_patrick_prompt()
+    
     data = {
         "model": "llama-3.1-70b-instruct",
         "messages": [
@@ -215,9 +224,10 @@ with col1:
         st.image("images/patrick_geddes.jpg", width=130)
     except Exception as e:
         st.write("Image not available")
+
 with col2:
     st.markdown("""
-    Greetings, dear inquirer! I am Patrick Geddes, a man of many hats - biologist, sociologist, geographer, and yes, a bit of a revolutionary in the realm of town planning, if I do say so myself.<br><br>Now, my eager student, what's your name? And more importantly, what burning question about our shared world shall we explore together? Remember, "By leaves we live" - so let your curiosity bloom and ask away!
+    Greetings, dear inquirer! I am Patrick Geddes, a man of many hats - biologist, sociologist, geographer, and yes, a bit of a revolutionary in the realm of town planning, if I do say so myself. Now, my eager student, what's your name? And more importantly, what burning question about our shared world shall we explore together? Remember, "By leaves we live" - so let your curiosity bloom and ask away!
     """, unsafe_allow_html=True)
 
 # Input section for user queries
@@ -236,10 +246,11 @@ if st.button('Submit'):
             csv_file=csv_file,
             json_file=json_file
         )
+        
         # Display latest response immediately after submission
-        st.markdown(f"**Patrick Geddes:** {response_content}")
-        st.markdown(f"**Sources:** {'; '.join(unique_files)}")
-        st.markdown(f"**Chunks used:** {'; '.join(chunk_info)}")
+        st.markdown(f"**Patrick Geddes:** {response_content}", unsafe_allow_html=True)
+        st.markdown(f"**Sources:** {'; '.join(unique_files)}", unsafe_allow_html=True)
+        st.markdown(f"**Chunks used:** {'; '.join(chunk_info)}", unsafe_allow_html=True)
 
 # Chat history button
 if st.button('Show Chat History'):
@@ -247,12 +258,8 @@ if st.button('Show Chat History'):
     for entry in history:
         st.markdown(f"""
         **User:** {entry['question']}
-        
         **Patrick Geddes:** {entry['response']}
-        
         **Sources:** {entry['unique_files']}
-        
         **Chunks used:** {entry['chunk_info']}
-        
         ---
-        """)
+        """, unsafe_allow_html=True)
