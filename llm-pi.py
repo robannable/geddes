@@ -258,8 +258,8 @@ if st.button('Show Chat History'):
     for entry in history:
         st.markdown(f"""
         <div style="background-color: #f0f0f0; padding: 10px; border-radius: 5px; margin-bottom: 10px;">
-        <p style="color: #black; font-weight: bold;">Name: {entry['name']}</p>
-        <p style="color: #black; font-weight: bold;">Date: {entry['date']} | Time: {entry['time']}</p>
+        <p style="color: black; font-weight: bold;">Name: {entry['name']}</p>
+        <p style="color: black; font-weight: bold;">Date: {entry['date']} | Time: {entry['time']}</p>
         <p style="color: #FFA500; font-weight: bold;">Question:</p>
         <p>{entry['question']}</p>
         <p style="color: #FFA500; font-weight: bold;">Patrick Geddes:</p>
