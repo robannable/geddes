@@ -258,15 +258,15 @@ if st.button('Show Chat History'):
     for entry in history:
         st.markdown(f"""
         <div style="background-color: #f0f0f0; padding: 10px; border-radius: 5px; margin-bottom: 10px;">
-        <p style="color: #FFA500; font-weight: bold;">Name: {entry['name']}</p>
-        <p style="color: #FFA500; font-weight: bold;">Date: {entry['date']} | Time: {entry['time']}</p>
-        <p style="color: #FFA500; font-weight: bold;">User:</p>
+        <p style="color: #black; font-weight: bold;">Name: {entry['name']}</p>
+        <p style="color: #black; font-weight: bold;">Date: {entry['date']} | Time: {entry['time']}</p>
+        <p style="color: #FFA500; font-weight: bold;">Question:</p>
         <p>{entry['question']}</p>
         <p style="color: #FFA500; font-weight: bold;">Patrick Geddes:</p>
         <p>{entry['response']}</p>
         <p style="color: black; font-weight: bold;">Sources:</p>
         <p>{entry['unique_files']}</p>
-        <p style="color: black; font-weight: bold;">Chunks used:</p>
+        <p style="color: black; font-weight: bold;">Document relevance:</p>
         <p>{entry['chunk_info']}</p>
         </div>
         """, unsafe_allow_html=True)
