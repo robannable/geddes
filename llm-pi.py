@@ -198,7 +198,7 @@ def get_perplexity_response(prompt, api_key):
 csv_file, json_file = initialize_log_files()
 
 # Streamlit UI
-st.title("Chat with Patrick Geddes")
+st.title("The Ghost of Geddes...")
 
 # Sidebar for About information
 about_content, contains_html = get_about_info()
@@ -217,8 +217,8 @@ with col1:
         st.write("Image not available")
 with col2:
     st.markdown("""
-    Welcome to the Patrick Geddes conversational AI. Here you can explore ideas and insights from one of the pioneers of urban planning.
-    """)
+    Greetings, dear inquirer! I am Patrick Geddes, a man of many hats - biologist, sociologist, geographer, and yes, a bit of a revolutionary in the realm of town planning, if I do say so myself.<br><br>Now, my eager student, what's your name? And more importantly, what burning question about our shared world shall we explore together? Remember, "By leaves we live" - so let your curiosity bloom and ask away!
+    """, unsafe_allow_html=True)
 
 # Input section for user queries
 user_name_input = st.text_input("Enter your name:")
