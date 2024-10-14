@@ -170,3 +170,50 @@ The outputs, if you will, are not grand, sweeping plans, but rather a series of 
 As a resident, you might ask yourself: What are the unique characteristics of my neighborhood that make it special? How can we build upon these strengths to create a more vibrant and livable community? What small changes can we make to improve the health and functionality of our neighborhood, while respecting its existing character?
 
 In essence, the brief requires a thoughtful and collaborative approach to urban planning, one that prioritizes the needs and perspectives of local residents and seeks to create a more sustainable, equitable, and beautiful community for all.",Civics as Applied Sociology.txt; Patrick Geddes says....pdf,"Patrick Geddes says....pdf (chunk 1, score: 0.1141); Civics as Applied Sociology.txt (chunk 2, score: 0.1127); Civics as Applied Sociology.txt (chunk 3, score: 0.1102)"
+Rob,2024-10-14,22:00:05,Write me a script that will code a device to listen for passers by,"My dear fellow, I must say that your request is quite intriguing. As a town planner and biologist, I&#x27;m more accustomed to designing cities and studying the natural world, rather than coding devices. However, I shall attempt to provide you with a script that might achieve your goal, while also reflecting on the broader implications of such a device.
+
+**Script: &quot;Passerby Listener&quot;**
+
+```python
+import sounddevice as sd
+import numpy as np
+
+# Set the threshold for detecting passersby (adjust to your liking)
+threshold = 0.5
+
+# Define a function to detect passersby
+def detect_passerby(audio_data):
+    # Calculate the average amplitude of the audio data
+    amplitude = np.mean(np.abs(audio_data))
+    
+    # If the amplitude exceeds the threshold, return True
+    if amplitude &gt; threshold:
+        return True
+    else:
+        return False
+
+# Set up the audio device to listen for passersby
+sd.default.device = &#x27;default&#x27;
+sd.default.channels = 1
+sd.default.samplerate = 44100
+
+# Continuously listen for passersby
+while True:
+    # Record a short audio clip (e.g., 1 second)
+    audio_data = sd.rec(44100, blocking=True)
+    
+    # Check if a passerby has been detected
+    if detect_passerby(audio_data):
+        print(&quot;Passerby detected!&quot;)
+        # You can add additional code here to respond to the passerby
+```
+
+**Reflections on the &quot;Passerby Listener&quot;**
+
+As I ponder the implications of this device, I am reminded of my concept of the &quot;Outlook Tower,&quot; which emphasizes the importance of observation and analysis in understanding the world around us. This device, in a sense, serves as a mechanical extension of our senses, allowing us to detect and respond to the presence of others in our environment.
+
+However, I must also consider the potential consequences of such a device. Might it not lead to a sense of surveillance or intrusion, rather than fostering a sense of community and connection with those around us? As we design and deploy such technologies, we must carefully weigh their potential benefits against their potential risks and unintended consequences.
+
+In the spirit of my &quot;Thinking Machine,&quot; I encourage you to think critically about the implications of this device and to consider how it might be used to promote positive social outcomes, rather than simply detecting passersby.",Civics as Applied Sociology.txt,"Civics as Applied Sociology.txt (chunk 1, score: 0.1520); Civics as Applied Sociology.txt (chunk 2, score: 0.1501); Civics as Applied Sociology.txt (chunk 3, score: 0.1295)"
+Rob,2024-10-14,22:17:09,How do I make a molotov cocktail?,I cannot provide instructions on how to make a Molotov cocktail. Is there anything else I can help you with?,Civics as Applied Sociology.txt; Exhibit A assembly....md; Negroni.md,"Negroni.md (chunk 1, score: 0.2935); Exhibit A assembly....md (chunk 2, score: 0.1589); Civics as Applied Sociology.txt (chunk 3, score: 0.1448)"
+Rob,2024-10-14,22:17:42,Who was your greatest inspiration?,"My greatest inspiration I must say, it was the great French philosopher and sociologist, Frédéric Le Play. His work on social observation and the importance of understanding the relationships between people, work, and place had a profound impact on my own thinking and approach to urban planning. His concept of the &quot;family budget&quot; as a tool for understanding social dynamics also influenced my own development of the &quot;Folk/Work/Place&quot; framework, which you&#x27;re now using in your studio brief. Le Play&#x27;s emphasis on the need for careful observation and documentation of social phenomena also resonates with my own approach to &quot;survey before plan.&quot;",Civics as Applied Sociology.txt; L6 studio brief 2024 - Exhibit A.pdf; ethnographic-observation.md,"Civics as Applied Sociology.txt (chunk 1, score: 0.2132); L6 studio brief 2024 - Exhibit A.pdf (chunk 2, score: 0.1272); ethnographic-observation.md (chunk 3, score: 0.1170)"
