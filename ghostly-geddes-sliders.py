@@ -225,9 +225,11 @@ if contains_html:
 else:
     st.sidebar.info(about_content)
 
-st.sidebar.header("Creativity Controls")
-temperature = st.sidebar.slider("Temperature", 0.0, 1.0, 0.7, 0.1)
-top_p = st.sidebar.slider("Top-p", 0.0, 1.0, 0.9, 0.1)
+st.sidebar.header("Response Controls")
+temperature = st.sidebar.slider("Creativity", 0.0, 1.0, 0.7, 0.1, 
+    help="Low: Focused, predictable. High: Creative, diverse.")
+top_p = st.sidebar.slider("Variety", 0.0, 1.0, 0.9, 0.1,
+    help="Low: Precise, limited. High: Broad, varied.")
 
 # Introduction section with image and personal introduction
 col1, col2 = st.columns([0.8, 3.2])
