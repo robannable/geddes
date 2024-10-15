@@ -17,7 +17,7 @@ llama-3.1-70b-instruct
 
 web:
 
-streamlit run ______.py --server.address 0.0.0.0
+streamlit run llm-pi.py --server.address 0.0.0.0
 
 ----
 
