@@ -233,7 +233,7 @@ with col2:
 
 # Input section for user queries
 user_name_input = st.text_input("Enter your name:")
-prompt_input = st.text_area("Ask Patrick Geddes a question:")
+prompt_input = st.text_area("Tell Patrick about your project:")
 
 if st.button('Submit'):
     if user_name_input and prompt_input:
