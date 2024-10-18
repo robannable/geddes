@@ -79,8 +79,10 @@ vectorizer, tfidf_matrix = compute_tfidf_matrix(document_chunks_with_filenames)
 def initialize_log_files():
     logs_dir = os.path.join(script_dir, "logs")
     os.makedirs(logs_dir, exist_ok=True)
-    csv_file = os.path.join(logs_dir, "response_log.csv")
-    json_file = os.path.join(logs_dir, "response_log.json")
+    
+    current_date = datetime.now().strftime("%Y-%m-%d")
+    csv_file = os.path.join(logs_dir, f"{current_date}_response_log.csv")
+    json_file = os.path.join(logs_dir, f"{current_date}_response_log.json")
 
     if not os.path.exists(csv_file):
         with open(csv_file, 'w', newline='') as f:
