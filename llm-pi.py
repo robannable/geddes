@@ -80,7 +80,7 @@ def initialize_log_files():
     logs_dir = os.path.join(script_dir, "logs")
     os.makedirs(logs_dir, exist_ok=True)
     
-    current_date = datetime.now().strftime("%Y-%m-%d")
+    current_date = datetime.now().strftime("%d-%m-%Y")
     csv_file = os.path.join(logs_dir, f"{current_date}_response_log.csv")
     json_file = os.path.join(logs_dir, f"{current_date}_response_log.json")
 
