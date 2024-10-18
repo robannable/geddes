@@ -156,7 +156,7 @@ def get_chat_history(user_name, csv_file):
     return history
 
 @st.cache_data
-def get_perplexity_response(prompt, api_key):
+def get_perplexity_response(prompt):
     # Transform the prompt
     prompt_vector = vectorizer.transform([prompt])
     
