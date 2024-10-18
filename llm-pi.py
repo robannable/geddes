@@ -84,7 +84,7 @@ def initialize_log_files():
     if not os.path.exists(csv_file):
         with open(csv_file, 'w', newline='') as f:
             writer = csv.writer(f)
-            writer.writerow(['name', 'date', 'time', 'question', 'response', 'unique_files', 'chunk_info'])
+            writer.writerow(['name', 'date', 'time', 'question', 'response', 'unique_files', 'chunk1_score', 'chunk2_score', 'chunk3_score'])
 
     if not os.path.exists(json_file):
         with open(json_file, 'w') as f:
@@ -107,13 +107,26 @@ def update_chat_logs(user_name, question, response, unique_files, chunk_info, cs
     now = datetime.now()
     date = now.strftime("%Y-%m-%d")
     time = now.strftime("%H:%M:%S")
-    
-    # Encode HTML content
     encoded_response = html.escape(response)
-    
+
+    # Use forward slash to separate unique files
+    unique_files_str = " / ".join(unique_files)
+
+    # Parse chunk_info to extract scores and filenames
+    chunk_scores = []
+    for chunk in chunk_info:
+        parts = chunk.split(', score: ')
+        score = float(parts[1].strip(')'))
+        filename = parts[0].split(' (chunk ')[0]
+        chunk_scores.append(f"{score:.4f} {filename}")
+
+    # Ensure we always have 3 entries, even if there are fewer chunks
+    while len(chunk_scores) < 3:
+        chunk_scores.append("")
+
     with open(csv_file, 'a', newline='') as f:
         writer = csv.writer(f)
-        writer.writerow([user_name, date, time, question, encoded_response, unique_files, chunk_info])
+        writer.writerow([user_name, date, time, question, encoded_response, unique_files_str] + chunk_scores)
     
     with open(json_file, 'r+') as f:
         try:
@@ -149,9 +162,9 @@ def get_chat_history(user_name, csv_file):
                     "date": row[1],
                     "time": row[2],
                     "question": row[3],
-                    "response": html.unescape(row[4]),  # Decode HTML content
+                    "response": html.unescape(row[4]),
                     "unique_files": row[5],
-                    "chunk_info": row[6]
+                    "chunk_info": [row[6], row[7], row[8]]
                 })
     return history
 
@@ -240,17 +253,16 @@ if st.button('Submit'):
             user_name=user_name_input.strip(),
             question=prompt_input.strip(),
             response=response_content,
-            unique_files="; ".join(unique_files),
-            chunk_info="; ".join(chunk_info),
+            unique_files=unique_files,  # Pass the list directly
+            chunk_info=chunk_info,  # Pass the original chunk_info
             csv_file=csv_file,
             json_file=json_file
         )
         
         # Display latest response immediately after submission
         st.markdown(f"**Patrick Geddes:** {response_content}", unsafe_allow_html=True)
-        st.markdown(f"**Sources:** {'; '.join(unique_files)}", unsafe_allow_html=True)
-        st.markdown(f"**Chunks used:** {'; '.join(chunk_info)}", unsafe_allow_html=True)
-
+        st.markdown(f"**Sources:** {' / '.join(unique_files)}", unsafe_allow_html=True)
+            
 # Chat history button
 if st.button('Show Chat History'):
     history = get_chat_history(user_name_input, csv_file)
@@ -266,6 +278,6 @@ if st.button('Show Chat History'):
         <p style="color: black; font-weight: bold;">Sources:</p>
         <p>{entry['unique_files']}</p>
         <p style="color: black; font-weight: bold;">Document relevance:</p>
-        <p>{entry['chunk_info']}</p>
+        <p>{entry['chunk_info'][0]} / {entry['chunk_info'][1]} / {entry['chunk_info'][2]}</p>
         </div>
         """, unsafe_allow_html=True)
