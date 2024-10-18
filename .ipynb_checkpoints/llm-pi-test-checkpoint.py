@@ -109,6 +109,9 @@ def update_chat_logs(user_name, question, response, unique_files, chunk_info, cs
     time = now.strftime("%H:%M:%S")
     encoded_response = html.escape(response)
 
+    # Use forward slash to separate unique files
+    unique_files_str = " / ".join(unique_files)
+
     # Parse chunk_info to extract scores and filenames
     chunk_scores = []
     for chunk in chunk_info:
@@ -123,7 +126,7 @@ def update_chat_logs(user_name, question, response, unique_files, chunk_info, cs
 
     with open(csv_file, 'a', newline='') as f:
         writer = csv.writer(f)
-        writer.writerow([user_name, date, time, question, encoded_response, unique_files] + chunk_scores)
+        writer.writerow([user_name, date, time, question, encoded_response, unique_files_str] + chunk_scores)
     
     with open(json_file, 'r+') as f:
         try:
@@ -250,7 +253,7 @@ if st.button('Submit'):
             user_name=user_name_input.strip(),
             question=prompt_input.strip(),
             response=response_content,
-            unique_files="; ".join(unique_files),
+            unique_files=unique_files,  # Pass the list directly
             chunk_info=chunk_info,  # Pass the original chunk_info
             csv_file=csv_file,
             json_file=json_file
@@ -258,7 +261,7 @@ if st.button('Submit'):
         
         # Display latest response immediately after submission
         st.markdown(f"**Patrick Geddes:** {response_content}", unsafe_allow_html=True)
-        st.markdown(f"**Sources:** {'; '.join(unique_files)}", unsafe_allow_html=True)
+        st.markdown(f"**Sources:** {' / '.join(unique_files)}", unsafe_allow_html=True)
             
 # Chat history button
 if st.button('Show Chat History'):
@@ -275,6 +278,6 @@ if st.button('Show Chat History'):
         <p style="color: black; font-weight: bold;">Sources:</p>
         <p>{entry['unique_files']}</p>
         <p style="color: black; font-weight: bold;">Document relevance:</p>
-        <p>{entry['chunk_info']}</p>
+        <p>{entry['chunk_info'][0]} / {entry['chunk_info'][1]} / {entry['chunk_info'][2]}</p>
         </div>
         """, unsafe_allow_html=True)
