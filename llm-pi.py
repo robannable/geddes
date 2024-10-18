@@ -18,11 +18,8 @@ script_dir = os.path.dirname(os.path.abspath(__file__))
 prompts_dir = os.path.join(script_dir, 'prompts')
 about_file_path = os.path.join(script_dir, 'about.txt')
 
-# Try to get the API key from config.py, if it fails, look for it in Streamlit secrets
-try:
-    from config import PERPLEXITY_API_KEY
-except ImportError:
-    PERPLEXITY_API_KEY = st.secrets.get("PERPLEXITY_API_KEY")
+#streamlit secrets API location
+PERPLEXITY_API_KEY = st.secrets["PERPLEXITY_API_KEY"]
 
 @st.cache_data
 def get_patrick_prompt():
@@ -178,7 +175,7 @@ def get_perplexity_response(prompt, api_key):
     
     url = "https://api.perplexity.ai/chat/completions"
     headers = {
-        "Authorization": f"Bearer {api_key}",
+        "Authorization": f"Bearer {st.secrets['PERPLEXITY_API_KEY']}",
         "Content-Type": "application/json"
     }
     
@@ -238,7 +235,7 @@ prompt_input = st.text_area("Ask Patrick Geddes a question:")
 
 if st.button('Submit'):
     if user_name_input and prompt_input:
-        response_content, unique_files, chunk_info = get_perplexity_response(prompt_input.strip(), PERPLEXITY_API_KEY.strip())
+        response_content, unique_files, chunk_info = get_perplexity_response(prompt_input.strip())
         update_chat_logs(
             user_name=user_name_input.strip(),
             question=prompt_input.strip(),
