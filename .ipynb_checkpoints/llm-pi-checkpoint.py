@@ -26,16 +26,18 @@ def get_patrick_prompt():
     prompt_file_path = os.path.join(prompts_dir, 'patrick_geddes_prompt.txt')
     try:
         with open(prompt_file_path, 'r') as file:
-            return file.read().strip()
+            prompt = file.read().strip()
+            prompt += "\n\nWhen responding to users, consider their name and potential gender implications. Avoid making assumptions based on stereotypes and strive for inclusive language. Adapt your language and examples to be appropriate for all users, regardless of their perceived gender."
+        return prompt
     except FileNotFoundError:
         st.warning(f"'{prompt_file_path}' not found. Using default prompt.")
-        return "You are Patrick Geddes, a Scottish biologist, sociologist, and town planner..."
+        return "You are Patrick Geddes, a Scottish biologist, sociologist, and town planner... [rest of default prompt] ... When responding to users, consider their name and potential gender implications. Avoid making assumptions based on stereotypes and strive for inclusive language. Adapt your language and examples to be appropriate for all users, regardless of their perceived gender."
 
 @st.cache_data
 def get_about_info():
     try:
         with open(about_file_path, 'r') as file:
-            return file.read().strip(), True  # Contains HTML
+            return file.read().strip(), True # Contains HTML
     except FileNotFoundError:
         st.warning(f"'{about_file_path}' not found. Using default about info.")
         return "This app uses Perplexity AI to simulate a conversation with Patrick Geddes...", False
@@ -57,7 +59,7 @@ def load_documents(directory='documents'):
             image = Image.open(filepath)
             text = pytesseract.image_to_string(image)
             texts.append((text, filename))
-
+    
     text_splitter = CharacterTextSplitter(chunk_size=1000, chunk_overlap=100)
     chunks_with_filenames = [(chunk, filename) for text, filename in texts for chunk in text_splitter.split_text(text)]
     return chunks_with_filenames
@@ -76,16 +78,15 @@ vectorizer, tfidf_matrix = compute_tfidf_matrix(document_chunks_with_filenames)
 def initialize_log_files():
     logs_dir = os.path.join(script_dir, "logs")
     os.makedirs(logs_dir, exist_ok=True)
-    
     current_date = datetime.now().strftime("%d-%m-%Y")
     csv_file = os.path.join(logs_dir, f"{current_date}_response_log.csv")
     json_file = os.path.join(logs_dir, f"{current_date}_response_log.json")
-
+    
     if not os.path.exists(csv_file):
         with open(csv_file, 'w', newline='') as f:
             writer = csv.writer(f)
             writer.writerow(['name', 'date', 'time', 'question', 'response', 'unique_files', 'chunk1_score', 'chunk2_score', 'chunk3_score'])
-
+    
     if not os.path.exists(json_file):
         with open(json_file, 'w') as f:
             json.dump([], f)
@@ -100,34 +101,49 @@ def initialize_log_files():
             f.seek(0)
             json.dump(logs, f)
             f.truncate()
-
+    
     return csv_file, json_file
 
 def update_chat_logs(user_name, question, response, unique_files, chunk_info, csv_file, json_file):
     now = datetime.now()
-    date = now.strftime("%Y-%m-%d")
+    date = now.strftime("%d-%m-%Y")
     time = now.strftime("%H:%M:%S")
+    
+    # Store raw data for logging
+    raw_response = response
+    
+    # HTML escape only for web output (not for logging)
     encoded_response = html.escape(response)
-
-    # Use forward slash to separate unique files
-    unique_files_str = " / ".join(unique_files)
-
-    # Parse chunk_info to extract scores and filenames
+    
+    # Use raw data for unique files and chunk info
+    unique_files_str = " - ".join(unique_files)
+    
+    # Parse chunk_info to extract scores and filenames (using raw data)
     chunk_scores = []
     for chunk in chunk_info:
-        parts = chunk.split(', score: ')
-        score = float(parts[1].strip(')'))
-        filename = parts[0].split(' (chunk ')[0]
-        chunk_scores.append(f"{score:.4f} {filename}")
-
+        try:
+            parts = chunk.split(', score: ')
+            if len(parts) == 2:
+                score = float(parts[1].strip(')'))
+                filename = parts[0].split(' (chunk ')[0]
+                chunk_scores.append(f"{score:.4f} - {filename}")
+            else:
+                chunk_scores.append(chunk)
+        except Exception as e:
+            st.warning(f"Error parsing chunk info: {e}")
+            chunk_scores.append(chunk)
+    
     # Ensure we always have 3 entries, even if there are fewer chunks
     while len(chunk_scores) < 3:
         chunk_scores.append("")
-
+    
+    # Write raw data to CSV log
     with open(csv_file, 'a', newline='') as f:
         writer = csv.writer(f)
-        writer.writerow([user_name, date, time, question, encoded_response, unique_files_str] + chunk_scores)
+        row = [user_name, date, time, question, raw_response, unique_files_str] + chunk_scores
+        writer.writerow(row)
     
+    # Write raw data to JSON log
     with open(json_file, 'r+') as f:
         try:
             logs = json.load(f)
@@ -135,26 +151,27 @@ def update_chat_logs(user_name, question, response, unique_files, chunk_info, cs
                 logs = []
         except json.JSONDecodeError:
             logs = []
-        
         logs.append({
             "name": user_name,
             "date": date,
             "time": time,
             "question": question,
-            "response": encoded_response,
+            "response": raw_response,
             "unique_files": unique_files,
             "chunk_info": chunk_info
         })
-        
         f.seek(0)
         json.dump(logs, f, indent=4)
         f.truncate()
+
+    # Return the encoded response for web output
+    return encoded_response
 
 def get_chat_history(user_name, csv_file):
     history = []
     with open(csv_file, 'r') as f:
         reader = csv.reader(f)
-        next(reader)  # Skip header row
+        next(reader) # Skip header row
         for row in reader:
             if row[0] == user_name:
                 history.append({
@@ -162,14 +179,14 @@ def get_chat_history(user_name, csv_file):
                     "date": row[1],
                     "time": row[2],
                     "question": row[3],
-                    "response": html.unescape(row[4]),
+                    "response": row[4],  # No need to unescape as we're storing raw data
                     "unique_files": row[5],
                     "chunk_info": [row[6], row[7], row[8]]
                 })
     return history
 
 @st.cache_data
-def get_perplexity_response(prompt):
+def get_perplexity_response(user_name, prompt):
     # Transform the prompt
     prompt_vector = vectorizer.transform([prompt])
     
@@ -198,7 +215,7 @@ def get_perplexity_response(prompt):
         "model": "llama-3.1-70b-instruct",
         "messages": [
             {"role": "system", "content": character_prompt},
-            {"role": "user", "content": f"Context: {context_text}\n\nQuestion: {prompt}"}
+            {"role": "user", "content": f"Context: {context_text}\n\nUser's name: {user_name}\n\nQuestion: {prompt}"}
         ]
     }
     
@@ -214,9 +231,6 @@ def get_perplexity_response(prompt):
     except requests.RequestException as e:
         st.error(f"API request failed: {e}")
         return f"Error: API request failed - {str(e)}", [], []
-
-# Initialize log files
-csv_file, json_file = initialize_log_files()
 
 # Streamlit UI
 st.title("The Ghost of Geddes...")
@@ -239,7 +253,9 @@ with col1:
 
 with col2:
     st.markdown("""
-    Greetings, dear inquirer! I am Patrick Geddes, a man of many hats - biologist, sociologist, geographer, and yes, a bit of a revolutionary in the realm of town planning, if I do say so myself. <br><br>Now, my eager student, what's your name? And more importantly, what burning question about our shared world shall we explore together? Remember, "By leaves we live" - so let your curiosity bloom and ask away!
+    Greetings, dear inquirer! I am Patrick Geddes, a man of many hats - biologist, sociologist, geographer, and yes, a bit of a revolutionary in the realm of town planning, if I do say so myself.
+    
+    Now, my eager student, what's your name? And more importantly, what burning question about our shared world shall we explore together? Remember, "By leaves we live" - so let your curiosity bloom and ask away!
     """, unsafe_allow_html=True)
 
 # Input section for user queries
@@ -248,23 +264,25 @@ prompt_input = st.text_area("Ask Patrick Geddes a question:")
 
 if st.button('Submit'):
     if user_name_input and prompt_input:
-        response_content, unique_files, chunk_info = get_perplexity_response(prompt_input.strip())
-        update_chat_logs(
+        csv_file, json_file = initialize_log_files()  # Get the latest file paths
+        response_content, unique_files, chunk_info = get_perplexity_response(user_name_input.strip(), prompt_input.strip())
+        encoded_response = update_chat_logs(
             user_name=user_name_input.strip(),
             question=prompt_input.strip(),
             response=response_content,
-            unique_files=unique_files,  # Pass the list directly
-            chunk_info=chunk_info,  # Pass the original chunk_info
+            unique_files=unique_files,
+            chunk_info=chunk_info,
             csv_file=csv_file,
             json_file=json_file
         )
-        
         # Display latest response immediately after submission
-        st.markdown(f"**Patrick Geddes:** {response_content}", unsafe_allow_html=True)
-        st.markdown(f"**Sources:** {' / '.join(unique_files)}", unsafe_allow_html=True)
-            
+        st.markdown(f"**Patrick Geddes:** {encoded_response}", unsafe_allow_html=True)
+        st.markdown(f"**Sources:** {' - '.join(html.escape(file) for file in unique_files)}", unsafe_allow_html=True)
+        st.markdown(f"**Chunks used:** {' - '.join(html.escape(chunk) for chunk in chunk_info)}", unsafe_allow_html=True)
+
 # Chat history button
 if st.button('Show Chat History'):
+    csv_file, _ = initialize_log_files()  # Get the latest CSV file path
     history = get_chat_history(user_name_input, csv_file)
     for entry in history:
         st.markdown(f"""
@@ -278,6 +296,5 @@ if st.button('Show Chat History'):
         <p style="color: black; font-weight: bold;">Sources:</p>
         <p>{entry['unique_files']}</p>
         <p style="color: black; font-weight: bold;">Document relevance:</p>
-        <p>{entry['chunk_info'][0]} / {entry['chunk_info'][1]} / {entry['chunk_info'][2]}</p>
-        </div>
+        {html.escape(entry['chunk_info'][0])} - {html.escape(entry['chunk_info'][1])} - {html.escape(entry['chunk_info'][2])}
         """, unsafe_allow_html=True)

@@ -286,14 +286,15 @@ if st.button('Show Chat History'):
     history = get_chat_history(user_name_input, csv_file)
     for entry in history:
         st.markdown(f"""
-        **Name:** {html.escape(entry['name'])}
-        **Date:** {html.escape(entry['date'])} | **Time:** {html.escape(entry['time'])}
-        **Question:**
-        {html.escape(entry['question'])}
-        **Patrick Geddes:**
-        {html.escape(entry['response'])}
-        **Sources:**
-        {html.escape(entry['unique_files'])}
-        **Document relevance:**
+        <div style="background-color: #f0f0f0; padding: 10px; border-radius: 5px; margin-bottom: 10px;">
+        <p style="color: black; font-weight: bold;">Name: {entry['name']}</p>
+        <p style="color: black; font-weight: bold;">Date: {entry['date']} | Time: {entry['time']}</p>
+        <p style="color: #FFA500; font-weight: bold;">Question:</p>
+        <p>{entry['question']}</p>
+        <p style="color: #FFA500; font-weight: bold;">Patrick Geddes:</p>
+        <p>{entry['response']}</p>
+        <p style="color: black; font-weight: bold;">Sources:</p>
+        <p>{entry['unique_files']}</p>
+        <p style="color: black; font-weight: bold;">Document relevance:</p>
         {html.escape(entry['chunk_info'][0])} - {html.escape(entry['chunk_info'][1])} - {html.escape(entry['chunk_info'][2])}
         """, unsafe_allow_html=True)
