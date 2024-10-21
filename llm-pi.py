@@ -198,23 +198,26 @@ def update_chat_logs(user_name, question, response, unique_files, chunk_info, cs
     # Return the encoded response for web output
     return encoded_response
 
-def get_chat_history(user_name, csv_file):
+def get_all_chat_history(user_name, logs_dir):
     history = []
-    with open(csv_file, 'r') as f:
-        reader = csv.reader(f)
-        next(reader)  # Skip header row
-        for row in reader:
-            if row[0] == user_name:
-                history.append({
-                    "name": row[0],
-                    "date": row[1],
-                    "time": row[2],
-                    "question": row[3],
-                    "response": row[4],  # No need to unescape as we're storing raw data
-                    "unique_files": row[5],
-                    "chunk_info": [row[6], row[7], row[8]]
-                })
-    return history
+    for filename in os.listdir(logs_dir):
+        if filename.endswith('_response_log.csv'):
+            file_path = os.path.join(logs_dir, filename)
+            with open(file_path, 'r') as f:
+                reader = csv.reader(f)
+                next(reader)  # Skip header row
+                for row in reader:
+                    if row[0] == user_name:
+                        history.append({
+                            "name": row[0],
+                            "date": row[1],
+                            "time": row[2],
+                            "question": row[3],
+                            "response": row[4],
+                            "unique_files": row[5],
+                            "chunk_info": [row[6], row[7], row[8]]
+                        })
+    return sorted(history, key=lambda x: (x['date'], x['time']), reverse=True)
 
 def load_today_history():
     current_date = datetime.now().strftime("%d-%m-%Y")
@@ -345,8 +348,8 @@ if st.button('Submit'):
 
 # Chat history button
 if st.button('Show Chat History'):
-    csv_file, _ = initialize_log_files()  # Get the latest CSV file path
-    history = get_chat_history(user_name_input, csv_file)
+    logs_dir = os.path.join(script_dir, "logs")
+    history = get_all_chat_history(user_name_input, logs_dir)
     for entry in history:
         st.markdown(f"""
         <div style="background-color: #f0f0f0; padding: 10px; border-radius: 5px; margin-bottom: 10px;">
