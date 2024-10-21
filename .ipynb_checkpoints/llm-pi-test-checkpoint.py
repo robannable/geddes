@@ -14,23 +14,19 @@ from sklearn.metrics.pairwise import cosine_similarity
 import numpy as np
 import html
 
-
 # Initialize pygame for audio
 pygame.mixer.init()
 
 # Get the directory of the current script
 script_dir = os.path.dirname(os.path.abspath(__file__))
 sound_dir = os.path.join(script_dir, 'sounds')
+prompts_dir = os.path.join(script_dir, 'prompts')
+about_file_path = os.path.join(script_dir, 'about.txt')
 
 # Load sound file
 ding_sound = pygame.mixer.Sound(os.path.join(sound_dir, 'ding.wav'))
 
-# Get the directory of the current script
-script_dir = os.path.dirname(os.path.abspath(__file__))
-prompts_dir = os.path.join(script_dir, 'prompts')
-about_file_path = os.path.join(script_dir, 'about.txt')
-
-#streamlit secrets API location
+# Streamlit secrets API location
 PERPLEXITY_API_KEY = st.secrets["PERPLEXITY_API_KEY"]
 
 @st.cache_data
@@ -39,7 +35,7 @@ def get_patrick_prompt():
     try:
         with open(prompt_file_path, 'r') as file:
             prompt = file.read().strip()
-            prompt += "\n\nWhen responding to users, consider their name and potential gender implications. Avoid making assumptions based on stereotypes and strive for inclusive language. Adapt your language and examples to be appropriate for all users, regardless of their perceived gender."
+        prompt += "\n\nWhen responding to users, consider their name and potential gender implications. Avoid making assumptions based on stereotypes and strive for inclusive language. Adapt your language and examples to be appropriate for all users, regardless of their perceived gender."
         return prompt
     except FileNotFoundError:
         st.warning(f"'{prompt_file_path}' not found. Using default prompt.")
@@ -49,7 +45,7 @@ def get_patrick_prompt():
 def get_about_info():
     try:
         with open(about_file_path, 'r') as file:
-            return file.read().strip(), True # Contains HTML
+            return file.read().strip(), True  # Contains HTML
     except FileNotFoundError:
         st.warning(f"'{about_file_path}' not found. Using default about info.")
         return "This app uses Perplexity AI to simulate a conversation with Patrick Geddes...", False
@@ -57,10 +53,14 @@ def get_about_info():
 @st.cache_data
 def load_documents(directories=['documents', 'history']):
     texts = []
+    current_date = datetime.now().strftime("%d-%m-%Y")
     for directory in directories:
         dir_path = os.path.join(script_dir, directory)
         if os.path.exists(dir_path):
             for filename in os.listdir(dir_path):
+                # Skip files with today's date in the history folder
+                if directory == 'history' and current_date in filename:
+                    continue
                 filepath = os.path.join(dir_path, filename)
                 if filename.endswith('.pdf'):
                     with open(filepath, 'rb') as file:
@@ -75,7 +75,7 @@ def load_documents(directories=['documents', 'history']):
                     text = pytesseract.image_to_string(image)
                     texts.append((text, filename))
 
-    text_splitter = CharacterTextSplitter(chunk_size=1000, chunk_overlap=100)
+    text_splitter = CharacterTextSplitter(chunk_size=1000, chunk_overlap=50)
     chunks_with_filenames = [(chunk, filename) for text, filename in texts for chunk in text_splitter.split_text(text)]
     return chunks_with_filenames
 
@@ -87,7 +87,7 @@ def compute_tfidf_matrix(document_chunks):
     return vectorizer, tfidf_matrix
 
 # Load document chunks and compute TF-IDF matrix at startup
-document_chunks_with_filenames = load_documents()
+document_chunks_with_filenames = load_documents(['documents', 'history'])
 vectorizer, tfidf_matrix = compute_tfidf_matrix(document_chunks_with_filenames)
 
 def initialize_log_files():
@@ -96,12 +96,12 @@ def initialize_log_files():
     current_date = datetime.now().strftime("%d-%m-%Y")
     csv_file = os.path.join(logs_dir, f"{current_date}_response_log.csv")
     json_file = os.path.join(logs_dir, f"{current_date}_response_log.json")
-    
+
     if not os.path.exists(csv_file):
         with open(csv_file, 'w', newline='') as f:
             writer = csv.writer(f)
             writer.writerow(['name', 'date', 'time', 'question', 'response', 'unique_files', 'chunk1_score', 'chunk2_score', 'chunk3_score'])
-    
+
     if not os.path.exists(json_file):
         with open(json_file, 'w') as f:
             json.dump([], f)
@@ -116,7 +116,7 @@ def initialize_log_files():
             f.seek(0)
             json.dump(logs, f)
             f.truncate()
-    
+
     return csv_file, json_file
 
 def write_markdown_history(user_name, question, response, csv_file):
@@ -125,7 +125,7 @@ def write_markdown_history(user_name, question, response, csv_file):
     current_date = datetime.now().strftime("%d-%m-%Y")
     current_time = datetime.now().strftime("%H:%M:%S")
     md_file = os.path.join(history_dir, f"{current_date}_conversation_history.md")
-
+    
     with open(md_file, 'a', encoding='utf-8') as f:
         f.write(f"## Date: {current_date} | Time: {current_time}\n\n")
         f.write(f"### User: {user_name}\n\n")
@@ -140,13 +140,12 @@ def update_chat_logs(user_name, question, response, unique_files, chunk_info, cs
 
     # Store raw data for logging
     raw_response = response
-    
     # HTML escape only for web output (not for logging)
     encoded_response = html.escape(response)
-    
+
     # Use raw data for unique files and chunk info
     unique_files_str = " - ".join(unique_files)
-    
+
     # Parse chunk_info to extract scores and filenames (using raw data)
     chunk_scores = []
     for chunk in chunk_info:
@@ -161,20 +160,20 @@ def update_chat_logs(user_name, question, response, unique_files, chunk_info, cs
         except Exception as e:
             st.warning(f"Error parsing chunk info: {e}")
             chunk_scores.append(chunk)
-    
+
     # Ensure we always have 3 entries, even if there are fewer chunks
     while len(chunk_scores) < 3:
         chunk_scores.append("")
 
     # Write to markdown history
-    write_markdown_history(user_name, question, raw_response, csv_file)    
-    
+    write_markdown_history(user_name, question, raw_response, csv_file)
+
     # Write raw data to CSV log
     with open(csv_file, 'a', newline='') as f:
         writer = csv.writer(f)
         row = [user_name, date, time, question, raw_response, unique_files_str] + chunk_scores
         writer.writerow(row)
-    
+
     # Write raw data to JSON log
     with open(json_file, 'r+') as f:
         try:
@@ -203,7 +202,7 @@ def get_chat_history(user_name, csv_file):
     history = []
     with open(csv_file, 'r') as f:
         reader = csv.reader(f)
-        next(reader) # Skip header row
+        next(reader)  # Skip header row
         for row in reader:
             if row[0] == user_name:
                 history.append({
@@ -217,24 +216,36 @@ def get_chat_history(user_name, csv_file):
                 })
     return history
 
+def load_today_history():
+    current_date = datetime.now().strftime("%d-%m-%Y")
+    history_dir = os.path.join(script_dir, "history")
+    today_file = os.path.join(history_dir, f"{current_date}_conversation_history.md")
+    
+    if os.path.exists(today_file):
+        with open(today_file, 'r', encoding='utf-8') as file:
+            return file.read()
+    return ""
+
 @st.cache_data
 def get_perplexity_response(user_name, prompt):
+    # Load today's history
+    today_history = load_today_history()
+
     # Transform the prompt
     prompt_vector = vectorizer.transform([prompt])
-    
+
     # Calculate cosine similarity
     cosine_similarities = cosine_similarity(prompt_vector, tfidf_matrix).flatten()
-    
+
     # Get the indices of the top 3 most similar chunks
     top_indices = cosine_similarities.argsort()[-3:][::-1]
-    
+
     # Get the top 3 chunks and their filenames
     context_chunks_with_filenames = [document_chunks_with_filenames[i] for i in top_indices]
     context_chunks = [chunk for chunk, _ in context_chunks_with_filenames]
     context_filenames_list = [filename for _, filename in context_chunks_with_filenames]
-    
     context_text = "\n".join(context_chunks)
-    
+
     # Add history context (assuming we've loaded it from the 'history' folder)
     history_context = "\n".join([chunk for chunk, filename in document_chunks_with_filenames if 'history' in filename.lower()])
 
@@ -243,19 +254,16 @@ def get_perplexity_response(user_name, prompt):
         "Authorization": f"Bearer {st.secrets['PERPLEXITY_API_KEY']}",
         "Content-Type": "application/json"
     }
+
     character_prompt = get_patrick_prompt()
-    
+
     # Include history instructions in the user message
     user_message = f"""Context: {context_text}
-
-Previous conversation history:
-{history_context}
-
-Instructions: The above history context contains previous conversations. Use this information to maintain consistency in your responses and to draw inspiration for new, relevant insights. You may refer to specific dates or previous discussions when appropriate. However, avoid directly repeating previous answers unless specifically asked to do so.
-
+Previous conversation history: {history_context}
+Today's conversations: {today_history}
+Instructions: The above history context contains previous conversations, including those from today. Use this information to maintain consistency in your responses and to draw inspiration for new, relevant insights. You may refer to specific dates or previous discussions when appropriate. If you reference a conversation from today that involves another user, explicitly mention whose discussion is relevant. However, avoid directly repeating previous answers unless specifically asked to do so.
 User's name: {user_name}
 Current date: {datetime.now().strftime("%d-%m-%Y")}
-
 Question: {prompt}"""
 
     data = {
@@ -265,7 +273,7 @@ Question: {prompt}"""
             {"role": "user", "content": user_message}
         ]
     }
-    
+
     try:
         response = requests.post(url, headers=headers, json=data)
         response.raise_for_status()
@@ -300,9 +308,10 @@ with col1:
 
 with col2:
     st.markdown("""
-    Greetings, dear inquirer! I am Patrick Geddes, a man of many hats - biologist, sociologist, geographer, and yes, a bit of a revolutionary in the realm of town planning, if I do say so myself.
+    Greetings, dear inquirer! I am Patrick Geddes, a man of many hats - biologist, sociologist, geographer, and yes, a bit of a revolutionary in the realm of town planning, if I do say so myself. 
     
-    Now, my eager student, what's your name? And more importantly, what burning question about our shared world shall we explore together? Remember, "By leaves we live" - so let your curiosity bloom and ask away!
+    Now, my eager student, what's your name? And more importantly, what burning question about our shared world shall we explore together? 
+    Remember, "By leaves we live" - so let your curiosity bloom and ask away!
     """, unsafe_allow_html=True)
 
 # Input section for user queries

@@ -20,16 +20,13 @@ pygame.mixer.init()
 # Get the directory of the current script
 script_dir = os.path.dirname(os.path.abspath(__file__))
 sound_dir = os.path.join(script_dir, 'sounds')
+prompts_dir = os.path.join(script_dir, 'prompts')
+about_file_path = os.path.join(script_dir, 'about.txt')
 
 # Load sound file
 ding_sound = pygame.mixer.Sound(os.path.join(sound_dir, 'ding.wav'))
 
-# Get the directory of the current script
-script_dir = os.path.dirname(os.path.abspath(__file__))
-prompts_dir = os.path.join(script_dir, 'prompts')
-about_file_path = os.path.join(script_dir, 'about.txt')
-
-#streamlit secrets API location
+# Streamlit secrets API location
 PERPLEXITY_API_KEY = st.secrets["PERPLEXITY_API_KEY"]
 
 @st.cache_data
@@ -311,7 +308,10 @@ with col1:
 
 with col2:
     st.markdown("""
-    Greetings, dear inquirer! I am Patrick Geddes, a man of many hats - biologist, sociologist, geographer, and yes, a bit of a revolutionary in the realm of town planning, if I do say so myself. Now, my eager student, what's your name? And more importantly, what burning question about our shared world shall we explore together? Remember, "By leaves we live" - so let your curiosity bloom and ask away!
+    Greetings, dear inquirer! I am Patrick Geddes, a man of many hats - biologist, sociologist, geographer, and yes, a bit of a revolutionary in the realm of town planning, if I do say so myself. 
+    
+    Now, my eager student, what's your name? And more importantly, what burning question about our shared world shall we explore together? 
+    Remember, "By leaves we live" - so let your curiosity bloom and ask away!
     """, unsafe_allow_html=True)
 
 # Input section for user queries
