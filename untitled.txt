@@ -1,0 +1,17 @@
+if st.button('Submit'):
+    if user_name_input and prompt_input:
+        csv_file, json_file = initialize_log_files()  # Get the latest file paths
+        response_content, unique_files, chunk_info = get_perplexity_response(user_name_input.strip(), prompt_input.strip())
+        encoded_response = update_chat_logs(
+            user_name=user_name_input.strip(),
+            question=prompt_input.strip(),
+            response=response_content,
+            unique_files=unique_files,
+            chunk_info=chunk_info,
+            csv_file=csv_file,
+            json_file=json_file
+        )
+        # Display latest response immediately after submission
+        st.markdown(f"**Patrick Geddes:** {encoded_response}", unsafe_allow_html=True)
+        st.markdown(f"**Sources:** {' - '.join(html.escape(file) for file in unique_files)}", unsafe_allow_html=True)
+        st.markdown(f"**Chunks used:** {' - '.join(html.escape(chunk) for chunk in chunk_info)}", unsafe_allow_html=True)
