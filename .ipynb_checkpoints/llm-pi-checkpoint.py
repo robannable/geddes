@@ -55,7 +55,7 @@ def get_about_info():
         return "This app uses Perplexity AI to simulate a conversation with Patrick Geddes...", False
 
 @st.cache_data
-def load_documents(directories=['documents', 'history']):
+def load_static_documents(directories=['documents', 'history']):
     texts = []
     for directory in directories:
         dir_path = os.path.join(script_dir, directory)
@@ -75,20 +75,49 @@ def load_documents(directories=['documents', 'history']):
                     text = pytesseract.image_to_string(image)
                     texts.append((text, filename))
 
+def load_today_history():
+
     text_splitter = CharacterTextSplitter(chunk_size=1000, chunk_overlap=100)
     chunks_with_filenames = [(chunk, filename) for text, filename in texts for chunk in text_splitter.split_text(text)]
     return chunks_with_filenames
 
 @st.cache_resource
-def compute_tfidf_matrix(document_chunks):
+def compute_tfidf_matrix(document_chunks, existing_vectorizer=None):
     documents = [chunk for chunk, _ in document_chunks]
-    vectorizer = TfidfVectorizer()
-    tfidf_matrix = vectorizer.fit_transform(documents)
-    return vectorizer, tfidf_matrix
+    if existing_vectorizer:
+        # Update existing vectorizer with new documents
+        tfidf_matrix = existing_vectorizer.transform(documents)
+        return existing_vectorizer, tfidf_matrix
+    else:
+        # Create new vectorizer and fit
+        vectorizer = TfidfVectorizer()
+        tfidf_matrix = vectorizer.fit_transform(documents)
+        return vectorizer, tfidf_matrix
 
 # Load document chunks and compute TF-IDF matrix at startup
-document_chunks_with_filenames = load_documents()
+document_chunks_with_filenames = load_documents(['documents', 'history'])
 vectorizer, tfidf_matrix = compute_tfidf_matrix(document_chunks_with_filenames)
+last_processed_time = datetime.min.time()
+
+def get_new_history_entries(last_processed_time):
+    current_date = datetime.now().strftime("%d-%m-%Y")
+    history_file = os.path.join(script_dir, "history", f"{current_date}_conversation_history.md")
+    new_entries = []
+    
+    if os.path.exists(history_file):
+        with open(history_file, 'r', encoding='utf-8') as f:
+            content = f.read()
+            entries = content.split("---\n\n")
+            for entry in entries:
+                entry_time_match = re.search(r'Time: (\d{2}:\d{2}:\d{2})', entry)
+                if entry_time_match:
+                    entry_time = datetime.strptime(entry_time_match.group(1), "%H:%M:%S").time()
+                    if entry_time > last_processed_time:
+                        new_entries.append(entry)
+    
+    return new_entries        
+
+
 
 def initialize_log_files():
     logs_dir = os.path.join(script_dir, "logs")
@@ -217,22 +246,40 @@ def get_chat_history(user_name, csv_file):
                 })
     return history
 
-@st.cache_data
+@st.cache_data(ttl=60)  # Cache for 60 seconds to reduce unnecessary reloads
 def get_perplexity_response(user_name, prompt):
+    global vectorizer, tfidf_matrix, document_chunks_with_filenames, last_processed_time
+
+    # Get new history entries
+    new_entries = get_new_history_entries(last_processed_time)
+    
+    if new_entries:
+        # Process new entries
+        text_splitter = CharacterTextSplitter(chunk_size=1000, chunk_overlap=100)
+        new_chunks = [(chunk, "today's_history.md") for entry in new_entries for chunk in text_splitter.split_text(entry)]
+        
+        # Add new chunks to existing documents
+        document_chunks_with_filenames.extend(new_chunks)
+        
+        # Update TF-IDF matrix
+        vectorizer, tfidf_matrix = compute_tfidf_matrix(document_chunks_with_filenames, existing_vectorizer=vectorizer)
+        
+        # Update last processed time
+        last_processed_time = datetime.now().time()
+
     # Transform the prompt
     prompt_vector = vectorizer.transform([prompt])
-    
+
     # Calculate cosine similarity
     cosine_similarities = cosine_similarity(prompt_vector, tfidf_matrix).flatten()
-    
+
     # Get the indices of the top 3 most similar chunks
     top_indices = cosine_similarities.argsort()[-3:][::-1]
-    
+
     # Get the top 3 chunks and their filenames
     context_chunks_with_filenames = [document_chunks_with_filenames[i] for i in top_indices]
     context_chunks = [chunk for chunk, _ in context_chunks_with_filenames]
     context_filenames_list = [filename for _, filename in context_chunks_with_filenames]
-    
     context_text = "\n".join(context_chunks)
     
     # Add history context (assuming we've loaded it from the 'history' folder)
