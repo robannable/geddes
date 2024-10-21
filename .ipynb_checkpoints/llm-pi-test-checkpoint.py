@@ -55,23 +55,26 @@ def get_about_info():
         return "This app uses Perplexity AI to simulate a conversation with Patrick Geddes...", False
 
 @st.cache_data
-def load_documents(directory='documents'):
+def load_documents(directories=['documents', 'history']):
     texts = []
-    for filename in os.listdir(os.path.join(script_dir, directory)):
-        filepath = os.path.join(script_dir, directory, filename)
-        if filename.endswith('.pdf'):
-            with open(filepath, 'rb') as file:
-                pdf_reader = PdfReader(file)
-                for page in pdf_reader.pages:
-                    texts.append((page.extract_text(), filename))
-        elif filename.endswith(('.txt', '.md')):
-            with open(filepath, 'r', encoding='utf-8') as file:
-                texts.append((file.read(), filename))
-        elif filename.endswith(('.png', '.jpg', '.jpeg')):
-            image = Image.open(filepath)
-            text = pytesseract.image_to_string(image)
-            texts.append((text, filename))
-    
+    for directory in directories:
+        dir_path = os.path.join(script_dir, directory)
+        if os.path.exists(dir_path):
+            for filename in os.listdir(dir_path):
+                filepath = os.path.join(dir_path, filename)
+                if filename.endswith('.pdf'):
+                    with open(filepath, 'rb') as file:
+                        pdf_reader = PdfReader(file)
+                        for page in pdf_reader.pages:
+                            texts.append((page.extract_text(), filename))
+                elif filename.endswith(('.txt', '.md')):
+                    with open(filepath, 'r', encoding='utf-8') as file:
+                        texts.append((file.read(), filename))
+                elif filename.endswith(('.png', '.jpg', '.jpeg')):
+                    image = Image.open(filepath)
+                    text = pytesseract.image_to_string(image)
+                    texts.append((text, filename))
+
     text_splitter = CharacterTextSplitter(chunk_size=1000, chunk_overlap=100)
     chunks_with_filenames = [(chunk, filename) for text, filename in texts for chunk in text_splitter.split_text(text)]
     return chunks_with_filenames
@@ -116,11 +119,25 @@ def initialize_log_files():
     
     return csv_file, json_file
 
+def write_markdown_history(user_name, question, response, csv_file):
+    history_dir = os.path.join(script_dir, "history")
+    os.makedirs(history_dir, exist_ok=True)
+    current_date = datetime.now().strftime("%d-%m-%Y")
+    current_time = datetime.now().strftime("%H:%M:%S")
+    md_file = os.path.join(history_dir, f"{current_date}_conversation_history.md")
+
+    with open(md_file, 'a', encoding='utf-8') as f:
+        f.write(f"## Date: {current_date} | Time: {current_time}\n\n")
+        f.write(f"### User: {user_name}\n\n")
+        f.write(f"**Question:** {question}\n\n")
+        f.write(f"**Patrick Geddes:** {response}\n\n")
+        f.write("---\n\n")
+
 def update_chat_logs(user_name, question, response, unique_files, chunk_info, csv_file, json_file):
     now = datetime.now()
     date = now.strftime("%d-%m-%Y")
     time = now.strftime("%H:%M:%S")
-    
+
     # Store raw data for logging
     raw_response = response
     
@@ -148,6 +165,9 @@ def update_chat_logs(user_name, question, response, unique_files, chunk_info, cs
     # Ensure we always have 3 entries, even if there are fewer chunks
     while len(chunk_scores) < 3:
         chunk_scores.append("")
+
+    # Write to markdown history
+    write_markdown_history(user_name, question, raw_response, csv_file)    
     
     # Write raw data to CSV log
     with open(csv_file, 'a', newline='') as f:
@@ -215,19 +235,34 @@ def get_perplexity_response(user_name, prompt):
     
     context_text = "\n".join(context_chunks)
     
+    # Add history context (assuming we've loaded it from the 'history' folder)
+    history_context = "\n".join([chunk for chunk, filename in document_chunks_with_filenames if 'history' in filename.lower()])
+
     url = "https://api.perplexity.ai/chat/completions"
     headers = {
         "Authorization": f"Bearer {st.secrets['PERPLEXITY_API_KEY']}",
         "Content-Type": "application/json"
     }
-    
     character_prompt = get_patrick_prompt()
     
+    # Include history instructions in the user message
+    user_message = f"""Context: {context_text}
+
+Previous conversation history:
+{history_context}
+
+Instructions: The above history context contains previous conversations. Use this information to maintain consistency in your responses and to draw inspiration for new, relevant insights. You may refer to specific dates or previous discussions when appropriate. However, avoid directly repeating previous answers unless specifically asked to do so.
+
+User's name: {user_name}
+Current date: {datetime.now().strftime("%d-%m-%Y")}
+
+Question: {prompt}"""
+
     data = {
         "model": "llama-3.1-70b-instruct",
         "messages": [
             {"role": "system", "content": character_prompt},
-            {"role": "user", "content": f"Context: {context_text}\n\nUser's name: {user_name}\n\nQuestion: {prompt}"}
+            {"role": "user", "content": user_message}
         ]
     }
     
