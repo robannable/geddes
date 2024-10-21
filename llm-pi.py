@@ -75,7 +75,7 @@ def load_documents(directories=['documents', 'history']):
                     text = pytesseract.image_to_string(image)
                     texts.append((text, filename))
 
-    text_splitter = CharacterTextSplitter(chunk_size=1000, chunk_overlap=100)
+    text_splitter = CharacterTextSplitter(chunk_size=1000, chunk_overlap=50)
     chunks_with_filenames = [(chunk, filename) for text, filename in texts for chunk in text_splitter.split_text(text)]
     return chunks_with_filenames
 
@@ -87,7 +87,7 @@ def compute_tfidf_matrix(document_chunks):
     return vectorizer, tfidf_matrix
 
 # Load document chunks and compute TF-IDF matrix at startup
-document_chunks_with_filenames = load_documents()
+document_chunks_with_filenames = load_documents(['documents', 'history'])
 vectorizer, tfidf_matrix = compute_tfidf_matrix(document_chunks_with_filenames)
 
 def initialize_log_files():
