@@ -1,6 +1,7 @@
 import streamlit as st
 import requests
 import json
+import pygame
 import os
 import csv
 from datetime import datetime
@@ -12,6 +13,17 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 import numpy as np
 import html
+
+
+# Initialize pygame for audio
+pygame.mixer.init()
+
+# Get the directory of the current script
+script_dir = os.path.dirname(os.path.abspath(__file__))
+sound_dir = os.path.join(script_dir, 'sounds')
+
+# Load sound file
+ding_sound = pygame.mixer.Sound(os.path.join(sound_dir, 'ding.wav'))
 
 # Get the directory of the current script
 script_dir = os.path.dirname(os.path.abspath(__file__))
@@ -264,7 +276,10 @@ prompt_input = st.text_area("Ask Patrick Geddes a question:")
 
 if st.button('Submit'):
     if user_name_input and prompt_input:
-        csv_file, json_file = initialize_log_files()  # Get the latest file paths
+        # Get the latest file paths
+        csv_file, json_file = initialize_log_files()  
+        
+        # Get response and update logs
         response_content, unique_files, chunk_info = get_perplexity_response(user_name_input.strip(), prompt_input.strip())
         encoded_response = update_chat_logs(
             user_name=user_name_input.strip(),
@@ -275,6 +290,10 @@ if st.button('Submit'):
             csv_file=csv_file,
             json_file=json_file
         )
+
+        # Play sound to indicate response is ready
+        ding_sound.play()
+        
         # Display latest response immediately after submission
         st.markdown(f"**Patrick Geddes:** {encoded_response}", unsafe_allow_html=True)
         st.markdown(f"**Sources:** {' - '.join(html.escape(file) for file in unique_files)}", unsafe_allow_html=True)

@@ -1,6 +1,7 @@
 import streamlit as st
 import requests
 import json
+import pygame
 import os
 import csv
 from datetime import datetime
@@ -12,15 +13,17 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 import numpy as np
 import html
-import pygame
 
-# Load sound file
-script_dir = os.path.dirname(os.path.abspath(__file__))
-sound_dir = os.path.join(script_dir, 'sounds')
-ding_sound = pygame.mixer.Sound(os.path.join(sound_dir, 'ding.wav'))
 
 # Initialize pygame for audio
 pygame.mixer.init()
+
+# Get the directory of the current script
+script_dir = os.path.dirname(os.path.abspath(__file__))
+sound_dir = os.path.join(script_dir, 'sounds')
+
+# Load sound file
+ding_sound = pygame.mixer.Sound(os.path.join(sound_dir, 'ding.wav'))
 
 # Get the directory of the current script
 script_dir = os.path.dirname(os.path.abspath(__file__))
@@ -275,18 +278,17 @@ if st.button('Submit'):
     if user_name_input and prompt_input:
         # Get the latest file paths
         csv_file, json_file = initialize_log_files()  
-        # Show a loading spinner while processing
-        with st.spinner('Patrick Geddes is pondering your question...'):
+        
         # Get response and update logs
-            response_content, unique_files, chunk_info = get_perplexity_response(user_name_input.strip(), prompt_input.strip())
-            encoded_response = update_chat_logs(
-                user_name=user_name_input.strip(),
-                question=prompt_input.strip(),
-                response=response_content,
-                unique_files=unique_files,
-                chunk_info=chunk_info,
-                csv_file=csv_file,
-                json_file=json_file
+        response_content, unique_files, chunk_info = get_perplexity_response(user_name_input.strip(), prompt_input.strip())
+        encoded_response = update_chat_logs(
+            user_name=user_name_input.strip(),
+            question=prompt_input.strip(),
+            response=response_content,
+            unique_files=unique_files,
+            chunk_info=chunk_info,
+            csv_file=csv_file,
+            json_file=json_file
         )
 
         # Play sound to indicate response is ready
