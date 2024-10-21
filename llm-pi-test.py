@@ -116,11 +116,23 @@ def initialize_log_files():
     
     return csv_file, json_file
 
+    def write_markdown_history(user_name, question, response, csv_file):
+    history_dir = os.path.join(script_dir, "history")
+    os.makedirs(history_dir, exist_ok=True)
+    current_date = datetime.now().strftime("%d-%m-%Y")
+    md_file = os.path.join(history_dir, f"{current_date}_conversation_history.md")
+
+    with open(md_file, 'a', encoding='utf-8') as f:
+        f.write(f"## User: {user_name}\n\n")
+        f.write(f"**Question:** {question}\n\n")
+        f.write(f"**Patrick Geddes:** {response}\n\n")
+        f.write("---\n\n")
+
 def update_chat_logs(user_name, question, response, unique_files, chunk_info, csv_file, json_file):
     now = datetime.now()
     date = now.strftime("%d-%m-%Y")
     time = now.strftime("%H:%M:%S")
-    
+
     # Store raw data for logging
     raw_response = response
     
@@ -148,6 +160,9 @@ def update_chat_logs(user_name, question, response, unique_files, chunk_info, cs
     # Ensure we always have 3 entries, even if there are fewer chunks
     while len(chunk_scores) < 3:
         chunk_scores.append("")
+
+    # Write to markdown history
+    write_markdown_history(user_name, question, raw_response, csv_file)    
     
     # Write raw data to CSV log
     with open(csv_file, 'a', newline='') as f:
@@ -215,19 +230,28 @@ def get_perplexity_response(user_name, prompt):
     
     context_text = "\n".join(context_chunks)
     
+        # Separate history context
+    history_context = "\n".join([chunk for chunk, filename in context_chunks_with_filenames if 'history' in filename.lower()])
+
     url = "https://api.perplexity.ai/chat/completions"
     headers = {
         "Authorization": f"Bearer {st.secrets['PERPLEXITY_API_KEY']}",
         "Content-Type": "application/json"
     }
-    
     character_prompt = get_patrick_prompt()
-    
     data = {
         "model": "llama-3.1-70b-instruct",
         "messages": [
             {"role": "system", "content": character_prompt},
-            {"role": "user", "content": f"Context: {context_text}\n\nUser's name: {user_name}\n\nQuestion: {prompt}"}
+            {"role": "user", "content": f"""Context: {context_text}
+
+Previous conversation history (for reference and inspiration): {history_context}
+
+The above history context contains previous conversations. Use this information to maintain consistency in your responses and to draw inspiration for new, relevant insights. However, avoid directly repeating previous answers unless specifically asked to do so.
+
+User's name: {user_name}
+
+Question: {prompt}"""}
         ]
     }
     
