@@ -210,12 +210,15 @@ def get_all_chat_history(user_name, logs_dir):
                     if row[0] == user_name:
                         history.append({
                             "name": row[0],
-                            "date": row[1],
-                            "time": row[2],
-                            "question": row[3],
-                            "response": row[4],
-                            "unique_files": row[5],
-                            "chunk_info": [row[6], row[7], row[8]]
+                            "date": row[1] if len(row) > 1 else "",
+                            "time": row[2] if len(row) > 2 else "",
+                            "question": row[3] if len(row) > 3 else "",
+                            "response": row[4] if len(row) > 4 else "",
+                            "unique_files": row[5] if len(row) > 5 else "",
+                            "chunk_info": [
+                                row[6] if len(row) > 6 else "",
+                                row[7] if len(row) > 7 else "",
+                                row[8] if len(row) > 8 else ""]
                         })
     return sorted(history, key=lambda x: (x['date'], x['time']), reverse=True)
 
