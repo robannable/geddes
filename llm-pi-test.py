@@ -145,25 +145,15 @@ def load_documents(directories=['documents', 'history', 'students']):
     
     for directory in directories:
         dir_path = os.path.join(script_dir, directory)
-        if not os.path.exists(dir_path):
-            continue
-            
-        for filename in os.listdir(dir_path):
-            filepath = os.path.join(dir_path, filename)
-            
-            # Modified history file handling
-            if directory == 'history':
-                # Include today's history file but skip processing other files with today's date
-                if current_date in filename:
-                    if filename == f"{current_date}_conversation_history.md":
-                        try:
-                            with open(filepath, 'r', encoding='utf-8') as file:
-                                texts.append((file.read(), filename))
-                        except Exception as e:
-                            st.warning(f"Error reading today's history file: {str(e)}")
-                    continue
-            
-            try:
+        if os.path.exists(dir_path):
+            for filename in os.listdir(dir_path):
+                filepath = os.path.join(dir_path, filename)
+                
+                # Modified history file handling
+                if directory == 'history':
+                    if current_date in filename:
+                        continue  # Skip current date files here
+                
                 if filename.endswith('.pdf'):
                     with open(filepath, 'rb') as file:
                         pdf_reader = PdfReader(file)
@@ -176,13 +166,11 @@ def load_documents(directories=['documents', 'history', 'students']):
                     image = Image.open(filepath)
                     text = pytesseract.image_to_string(image)
                     texts.append((text, filename))
-            except Exception as e:
-                st.warning(f"Error processing file {filename}: {str(e)}")
-                continue
 
     text_splitter = CharacterTextSplitter(chunk_size=1000, chunk_overlap=50)
     chunks_with_filenames = [(chunk, filename) for text, filename in texts for chunk in text_splitter.split_text(text)]
     return chunks_with_filenames
+
     
 @st.cache_resource
 def compute_tfidf_matrix(document_chunks):
@@ -342,52 +330,39 @@ def load_today_history():
         return ""
 
 def get_perplexity_response(user_name, prompt):
-    # Create a session with retry strategy
-    session = requests.Session()
-    retry_strategy = Retry(
-        total=3,
-        backoff_factor=0.5,
-        status_forcelist=[429, 500, 502, 503, 504, 524]
-    )
-    adapter = HTTPAdapter(max_retries=retry_strategy)
-    session.mount("https://", adapter)
-    session.mount("http://", adapter)
-
+    # Load today's history explicitly
+    today_history = load_today_history()
+    
+    # Initialize API handler with retry strategy
+    api_handler = PerplexityAPIHandler(st.secrets['PERPLEXITY_API_KEY'])
+    
     try:
-        # Transform the prompt
+        # Transform and analyze prompt
         prompt_vector = vectorizer.transform([prompt])
-
-        # Calculate cosine similarity
         cosine_similarities = cosine_similarity(prompt_vector, tfidf_matrix).flatten()
-
-        # Get the indices of the top 3 most similar chunks
         top_indices = cosine_similarities.argsort()[-3:][::-1]
 
-        # Get the top 3 chunks and their filenames
+        # Get context chunks and filenames
         context_chunks_with_filenames = [document_chunks_with_filenames[i] for i in top_indices]
         context_chunks = [chunk for chunk, _ in context_chunks_with_filenames]
         context_filenames_list = [filename for _, filename in context_chunks_with_filenames]
         context_text = "\n".join(context_chunks)
 
-        # Add history context
-        history_context = "\n".join([chunk for chunk, filename in document_chunks_with_filenames if 'history' in filename.lower()])
-
+        # Build context layers
+        history_context = "\n".join([chunk for chunk, filename in document_chunks_with_filenames 
+                                   if 'history' in filename.lower()])
+        
         # Add student context with normalized name matching
         normalized_name = user_name.lower().strip()
         student_context = "\n".join([chunk for chunk, filename in document_chunks_with_filenames 
                                    if 'students' in filename.lower() and 
                                    normalized_name in filename.lower()])
 
-        url = "https://api.perplexity.ai/chat/completions"
-        headers = {
-            "Authorization": f"Bearer {st.secrets['PERPLEXITY_API_KEY']}",
-            "Content-Type": "application/json"
-        }
-
+        # Prepare API request
         character_prompt = get_patrick_prompt()
-
         user_message = f"""Context: {context_text}
 Previous conversation history: {history_context}
+Today's conversations: {today_history}
 Student project context: {student_context}
 Instructions: The above context includes general reference material, conversation history, 
 and specific information about the student's project proposal. Use this information to:
@@ -407,36 +382,25 @@ Question: {prompt}"""
             ]
         }
 
-        try:
-            response = session.post(url, headers=headers, json=data, timeout=30)
-            response.raise_for_status()
-            
-            response_json = response.json()
-            if "choices" in response_json and len(response_json["choices"]) > 0:
-                chunk_info = [f"{filename} (chunk {i+1}, score: {cosine_similarities[top_indices[i]]:.4f})" 
-                             for i, filename in enumerate(context_filenames_list)]
-                return response_json["choices"][0]["message"]["content"], list(set(context_filenames_list)), chunk_info
-            else:
-                return "Error: Unexpected response format from API.", [], []
-                
-        except requests.exceptions.ConnectionError:
-            return ("I apologize, but I'm having trouble connecting to my knowledge base. "
-                   "Please check your internet connection and try again."), [], []
-                
-        except requests.exceptions.Timeout:
-            return ("I apologize, but the server is taking too long to respond. "
-                   "Please try again in a moment."), [], []
-                
-        except requests.exceptions.HTTPError as e:
-            if e.response.status_code == 429:
-                return ("I'm receiving too many requests at the moment. "
-                       "Please wait a moment before trying again."), [], []
-            else:
-                return (f"An error occurred while processing your request "
-                       f"(Status code: {e.response.status_code}). Please try again."), [], []
-                    
+        # Make API request with error handling
+        response_json = api_handler.make_request(data)
+        
+        if "choices" in response_json and len(response_json["choices"]) > 0:
+            chunk_info = [f"{filename} (chunk {i+1}, score: {cosine_similarities[top_indices[i]]:.4f})" 
+                         for i, filename in enumerate(context_filenames_list)]
+            return response_json["choices"][0]["message"]["content"], list(set(context_filenames_list)), chunk_info
+        
+        return "Error: Unexpected response format from API.", [], []
+
+    except ConnectionError as e:
+        return ("I apologize, but I'm having trouble connecting to my knowledge base. "
+               "Please check your internet connection and try again."), [], []
+    except TimeoutError as e:
+        return ("I apologize, but the server is taking too long to respond. "
+               "Please try again in a moment."), [], []
     except Exception as e:
         return f"An unexpected error occurred: {str(e)}", [], []
+
 
 
 # Streamlit UI
