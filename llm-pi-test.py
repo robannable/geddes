@@ -142,14 +142,28 @@ def get_about_info():
 def load_documents(directories=['documents', 'history', 'students']):
     texts = []
     current_date = datetime.now().strftime("%d-%m-%Y")
+    
     for directory in directories:
         dir_path = os.path.join(script_dir, directory)
-        if os.path.exists(dir_path):
-            for filename in os.listdir(dir_path):
-                # Skip files with today's date in the history folder
-                if directory == 'history' and current_date in filename:
+        if not os.path.exists(dir_path):
+            continue
+            
+        for filename in os.listdir(dir_path):
+            filepath = os.path.join(dir_path, filename)
+            
+            # Modified history file handling
+            if directory == 'history':
+                # Include today's history file but skip processing other files with today's date
+                if current_date in filename:
+                    if filename == f"{current_date}_conversation_history.md":
+                        try:
+                            with open(filepath, 'r', encoding='utf-8') as file:
+                                texts.append((file.read(), filename))
+                        except Exception as e:
+                            st.warning(f"Error reading today's history file: {str(e)}")
                     continue
-                filepath = os.path.join(dir_path, filename)
+            
+            try:
                 if filename.endswith('.pdf'):
                     with open(filepath, 'rb') as file:
                         pdf_reader = PdfReader(file)
@@ -162,11 +176,14 @@ def load_documents(directories=['documents', 'history', 'students']):
                     image = Image.open(filepath)
                     text = pytesseract.image_to_string(image)
                     texts.append((text, filename))
+            except Exception as e:
+                st.warning(f"Error processing file {filename}: {str(e)}")
+                continue
 
     text_splitter = CharacterTextSplitter(chunk_size=1000, chunk_overlap=50)
     chunks_with_filenames = [(chunk, filename) for text, filename in texts for chunk in text_splitter.split_text(text)]
     return chunks_with_filenames
-
+    
 @st.cache_resource
 def compute_tfidf_matrix(document_chunks):
     documents = [chunk for chunk, _ in document_chunks]
@@ -311,14 +328,18 @@ def get_all_chat_history(user_name, logs_dir):
     return sorted(history, key=lambda x: (x['date'], x['time']), reverse=True)
 
 def load_today_history():
-    current_date = datetime.now().strftime("%d-%m-%Y")
-    history_dir = os.path.join(script_dir, "history")
-    today_file = os.path.join(history_dir, f"{current_date}_conversation_history.md")
-    
-    if os.path.exists(today_file):
-        with open(today_file, 'r', encoding='utf-8') as file:
-            return file.read()
-    return ""
+    try:
+        current_date = datetime.now().strftime("%d-%m-%Y")
+        history_dir = os.path.join(script_dir, "history")
+        today_file = os.path.join(history_dir, f"{current_date}_conversation_history.md")
+        
+        if os.path.exists(today_file):
+            with open(today_file, 'r', encoding='utf-8') as file:
+                return file.read()
+        return ""
+    except Exception as e:
+        st.warning(f"Error loading today's history: {str(e)}")
+        return ""
 
 def get_perplexity_response(user_name, prompt):
     # Create a session with retry strategy
