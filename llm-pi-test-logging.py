@@ -15,7 +15,6 @@ from sklearn.metrics.pairwise import cosine_similarity
 import numpy as np
 import html
 
-
 from urllib3.util.retry import Retry
 from requests.adapters import HTTPAdapter
 import requests
@@ -23,18 +22,27 @@ from requests.exceptions import RequestException
 
 import logging
 
-# Set up logging
+# First, define the script directory (this must come before any uses of script_dir)
+script_dir = os.path.dirname(os.path.abspath(__file__))
+
+# Then set up logging
 log_dir = os.path.join(script_dir, "debug_logs")
 os.makedirs(log_dir, exist_ok=True)
 current_date = datetime.now().strftime("%d-%m-%Y")
 log_file = os.path.join(log_dir, f"{current_date}_debug.log")
 
+# Configure logging
 logging.basicConfig(
     filename=log_file,
     level=logging.DEBUG,
-    format='%(asctime)s - %(levelname)s - %(message)s'
+    format='%(asctime)s - %(levelname)s - %(message)s',
+    encoding='utf-8'
 )
 
+# Add this line to also show logs in the console
+logging.getLogger().addHandler(logging.StreamHandler())
+
+# Set up API
 class PerplexityAPIHandler:
     def __init__(self, api_key, max_retries=3, timeout=30):
         self.api_key = api_key
@@ -97,8 +105,7 @@ class PerplexityAPIHandler:
 # Initialize pygame for audio
 pygame.mixer.init()
 
-# Get the directory of the current script
-script_dir = os.path.dirname(os.path.abspath(__file__))
+# Initialize directories
 sound_dir = os.path.join(script_dir, 'sounds')
 prompts_dir = os.path.join(script_dir, 'prompts')
 about_file_path = os.path.join(script_dir, 'about.txt')
