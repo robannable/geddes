@@ -10,6 +10,7 @@ import json
 import pygame
 import os
 import csv
+import time
 from datetime import datetime
 import logging
 from pypdf import PdfReader
@@ -173,30 +174,56 @@ def get_about_info():
 @st.cache_data
 def load_documents(directories=['documents', 'history', 'students']):
     texts = []
-    current_date = datetime.now().strftime("%d-%m-%Y")
+    current_date = datetime.now().strftime('%d-%m-%Y')
+    total_time = 0
+
+    logging.info("Starting document loading process")
+    
     for directory in directories:
         dir_path = os.path.join(script_dir, directory)
         if os.path.exists(dir_path):
+            logging.info(f"Processing directory: {directory}")
             for filename in os.listdir(dir_path):
+                start_time = time.time()
+                
                 # Skip files with today's date in the history folder
                 if directory == 'history' and current_date in filename:
                     continue
+                    
                 filepath = os.path.join(dir_path, filename)
-                if filename.endswith('.pdf'):
-                    with open(filepath, 'rb') as file:
-                        pdf_reader = PdfReader(file)
-                        for page in pdf_reader.pages:
-                            texts.append((page.extract_text(), filename))
-                elif filename.endswith(('.txt', '.md')):
-                    with open(filepath, 'r', encoding='utf-8') as file:
-                        texts.append((file.read(), filename))
-                elif filename.endswith(('.png', '.jpg', '.jpeg')):
-                    image = Image.open(filepath)
-                    text = pytesseract.image_to_string(image)
-                    texts.append((text, filename))
+                try:
+                    if filename.endswith('.pdf'):
+                        with open(filepath, 'rb') as file:
+                            pdf_reader = PdfReader(file)
+                            for page in pdf_reader.pages:
+                                texts.append((page.extract_text(), filename))
+                        
+                    elif filename.endswith(('.txt', '.md')):
+                        with open(filepath, 'r', encoding='utf-8') as file:
+                            texts.append((file.read(), filename))
+                            
+                    elif filename.endswith(('.png', '.jpg', '.jpeg')):
+                        image = Image.open(filepath)
+                        text = pytesseract.image_to_string(image)
+                        texts.append((text, filename))
+                        
+                    end_time = time.time()
+                    elapsed_time = end_time - start_time
+                    total_time += elapsed_time
+                    
+                    logging.info(f'Loaded {filename} in {elapsed_time:.2f} seconds')
+                    
+                except Exception as e:
+                    logging.error(f"Error loading {filename}: {str(e)}")
+                    continue
 
+    logging.info(f"Total document loading time: {total_time:.2f} seconds")
+    
     text_splitter = CharacterTextSplitter(chunk_size=1000, chunk_overlap=50)
     chunks_with_filenames = [(chunk, filename) for text, filename in texts for chunk in text_splitter.split_text(text)]
+    
+    logging.info(f"Created {len(chunks_with_filenames)} chunks from {len(texts)} documents")
+    
     return chunks_with_filenames
 
 
