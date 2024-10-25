@@ -4,6 +4,7 @@ import json
 import pygame
 import os
 import csv
+import time
 from datetime import datetime
 from pypdf import PdfReader
 from langchain.text_splitter import CharacterTextSplitter
@@ -13,6 +14,7 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 import numpy as np
 import html
+
 
 
 from urllib3.util.retry import Retry
@@ -332,6 +334,7 @@ def load_today_history():
 def get_perplexity_response(user_name, prompt):
     # Load today's history explicitly
     today_history = load_today_history()
+    api_handler = PerplexityAPIHandler(PERPLEXITY_API_KEY)
     
     # Initialize API handler with retry strategy
     api_handler = PerplexityAPIHandler(st.secrets['PERPLEXITY_API_KEY'])
