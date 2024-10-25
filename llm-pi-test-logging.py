@@ -4,8 +4,14 @@ import json
 import pygame
 import os
 import csv
-import time
+import streamlit as st
+import requests
+import json
+import pygame
+import os
+import csv
 from datetime import datetime
+import logging
 from pypdf import PdfReader
 from langchain.text_splitter import CharacterTextSplitter
 import pytesseract
@@ -14,15 +20,12 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 import numpy as np
 import html
-
 from urllib3.util.retry import Retry
 from requests.adapters import HTTPAdapter
 import requests
 from requests.exceptions import RequestException
 
-import logging
-
-# First, define the script directory (this must come before any uses of script_dir)
+# First, define the script directory
 script_dir = os.path.dirname(os.path.abspath(__file__))
 
 # Then set up logging
@@ -39,8 +42,27 @@ logging.basicConfig(
     encoding='utf-8'
 )
 
-# Add this line to also show logs in the console
-logging.getLogger().addHandler(logging.StreamHandler())
+# Add console handler
+console_handler = logging.StreamHandler()
+console_handler.setLevel(logging.DEBUG)
+logging.getLogger().addHandler(console_handler)
+
+# Initialize directories
+sound_dir = os.path.join(script_dir, 'sounds')
+prompts_dir = os.path.join(script_dir, 'prompts')
+about_file_path = os.path.join(script_dir, 'about.txt')
+
+# Initialize pygame for audio
+pygame.mixer.init()
+
+# Load sound file
+ding_sound = pygame.mixer.Sound(os.path.join(sound_dir, 'ding2.wav'))
+
+# Log initialization
+logging.info("Application initialized")
+logging.debug(f"Script directory: {script_dir}")
+logging.debug(f"Log directory: {log_dir}")
+
 
 # Set up API
 class PerplexityAPIHandler:
@@ -101,17 +123,6 @@ class PerplexityAPIHandler:
                 else:
                     raise
 
-
-# Initialize pygame for audio
-pygame.mixer.init()
-
-# Initialize directories
-sound_dir = os.path.join(script_dir, 'sounds')
-prompts_dir = os.path.join(script_dir, 'prompts')
-about_file_path = os.path.join(script_dir, 'about.txt')
-
-# Load sound file
-ding_sound = pygame.mixer.Sound(os.path.join(sound_dir, 'ding2.wav'))
 
 # Streamlit secrets API location
 PERPLEXITY_API_KEY = st.secrets["PERPLEXITY_API_KEY"]
