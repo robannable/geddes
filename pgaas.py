@@ -166,39 +166,61 @@ def load_documents(directories=['documents', 'history', 'students']):
     texts = []
     current_date = datetime.now().strftime("%d-%m-%Y")
     
+    # Define system directories to ignore
+    ignore_dirs = {
+        '__pycache__',
+        '.ipynb_checkpoints',
+        '.git',
+        'debug_logs',
+        'logs',
+        'sounds',
+        'prompts',
+        'images'
+    }
+    
     for directory in directories:
         dir_path = os.path.join(script_dir, directory)
         if os.path.exists(dir_path):
             dir_start_time = time.time()
             files_processed = 0
             
-            for filename in os.listdir(dir_path):
-                if directory == 'history' and current_date in filename:
+            for item in os.listdir(dir_path):
+                # Skip if item is in ignored directories or is hidden
+                if item in ignore_dirs or item.startswith('.'):
                     continue
                     
-                filepath = os.path.join(dir_path, filename)
+                filepath = os.path.join(dir_path, item)
+                
+                # Skip if it's a directory
+                if os.path.isdir(filepath):
+                    continue
+                    
+                # Skip files with today's date in the history folder
+                if directory == 'history' and current_date in item:
+                    continue
+                
                 file_start_time = time.time()
                 
                 try:
-                    if filename.endswith('.pdf'):
+                    if item.endswith('.pdf'):
                         with open(filepath, 'rb') as file:
                             pdf_reader = PdfReader(file)
                             for page in pdf_reader.pages:
-                                texts.append((page.extract_text(), filename))
-                    elif filename.endswith(('.txt', '.md')):
+                                texts.append((page.extract_text(), item))
+                    elif item.endswith(('.txt', '.md')):
                         with open(filepath, 'r', encoding='utf-8') as file:
-                            texts.append((file.read(), filename))
-                    elif filename.endswith(('.png', '.jpg', '.jpeg')):
+                            texts.append((file.read(), item))
+                    elif item.endswith(('.png', '.jpg', '.jpeg')):
                         image = Image.open(filepath)
                         text = pytesseract.image_to_string(image)
-                        texts.append((text, filename))
+                        texts.append((text, item))
                         
                     file_time = time.time() - file_start_time
-                    logging.info(f"Loaded {filename} in {file_time:.2f} seconds")
+                    logging.info(f"Loaded {item} in {file_time:.2f} seconds")
                     files_processed += 1
                     
                 except Exception as e:
-                    logging.error(f"Failed to load {filename}: {str(e)}")
+                    logging.error(f"Failed to load {item}: {str(e)}")
             
             dir_time = time.time() - dir_start_time
             logging.info(f"Directory {directory}: processed {files_processed} files in {dir_time:.2f} seconds")
