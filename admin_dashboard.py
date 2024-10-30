@@ -1,279 +1,173 @@
-# admin_dashboard.py
+# admin_dashboard_optimized.py
 
 import streamlit as st
-import pandas as pd
-import plotly.express as px
-import plotly.graph_objects as go
-from datetime import datetime, timedelta
-import json
-import os
-import numpy as np
 from collections import defaultdict
+from datetime import datetime, timedelta
+import os
+import csv
+from typing import Dict, List, Tuple
+import altair as alt
+import sqlite3
+import gc
 
-# Force pandas to use the python engine and disable pyarrow
-pd.options.io.engine = "python"
+# Memory optimization settings
+CHUNK_SIZE = 1000
+CACHE_TTL = 3600  # 1 hour
+MAX_RECORDS_DISPLAY = 1000
 
 def check_password():
-    """Returns `True` if the user had the correct password."""
-    def password_entered():
-        if st.session_state["password"] == st.secrets["admin_password"]:
-            st.session_state["password_correct"] = True
-            del st.session_state["password"]
-        else:
-            st.session_state["password_correct"] = False
-
+    """Simple password protection with minimal memory usage"""
     if "password_correct" not in st.session_state:
-        st.text_input("Password", type="password", 
-                     on_change=password_entered, key="password")
+        st.text_input("Password", type="password", key="password",
+                     on_change=lambda: setattr(st.session_state, "password_correct", 
+                     st.session_state.password == st.secrets["admin_password"]))
         return False
-    elif not st.session_state["password_correct"]:
-        st.text_input("Password", type="password", 
-                     on_change=password_entered, key="password")
-        st.error("😕 Password incorrect")
-        return False
-    else:
-        return True
+    return st.session_state.password_correct
 
-def load_response_data(logs_dir):
-    """CSV loading with specific date format handling"""
-    all_data = []
-    
+@st.cache_data(ttl=CACHE_TTL)
+def load_response_data(logs_dir: str) -> List[Dict]:
+    """Load data in chunks using CSV reader instead of pandas"""
+    data = []
     for filename in os.listdir(logs_dir):
         if not filename.endswith('_response_log.csv'):
             continue
             
         file_path = os.path.join(logs_dir, filename)
-        
         try:
-            # Basic CSV reading
-            df = pd.read_csv(file_path)
-            
-            # Convert date using the specific format from your CSV
-            df['date'] = pd.to_datetime(df['date'], format='%d-%m-%Y')
-            
-            # Convert time if needed
-            if 'time' in df.columns:
-                df['time'] = pd.to_datetime(df['time'], format='%H:%M:%S').dt.time
-                
-            all_data.append(df)
-            
+            with open(file_path, 'r') as f:
+                reader = csv.DictReader(f)
+                for row in reader:
+                    data.append(row)
+                    if len(data) >= MAX_RECORDS_DISPLAY:
+                        break
         except Exception as e:
-            st.error(f"Error processing {filename}: {str(e)}")
-            continue
-    
-    if not all_data:
-        return pd.DataFrame()
-    
-    return pd.concat(all_data, ignore_index=True)
+            st.error(f"Error reading {filename}: {str(e)}")
+            
+    return data
 
-def analyze_chunk_scores(df):
-    """Analyze document chunk relevance scores"""
+def process_chunk_scores(data: List[Dict]) -> List[Tuple[float, str]]:
+    """Process chunk scores without pandas"""
     scores = []
-    files = []
-    
-    for _, row in df.iterrows():
-        for chunk_col in ['chunk1_score', 'chunk2_score', 'chunk3_score']:
-            if pd.notna(row[chunk_col]):
+    for row in data:
+        for chunk_key in ['chunk1_score', 'chunk2_score', 'chunk3_score']:
+            if chunk_key in row and row[chunk_key]:
                 try:
-                    parts = row[chunk_col].split(' - ')
+                    parts = row[chunk_key].split(' - ')
                     if len(parts) >= 2:
-                        score = float(parts[0])
-                        filename = parts[1]
-                        scores.append(score)
-                        files.append(filename)
+                        scores.append((float(parts[0]), parts[1]))
                 except:
                     continue
-    
-    return pd.DataFrame({'score': scores, 'file': files})
+    return scores
 
-def display_chunk_analysis(df):
-    st.subheader("Document Chunk Relevance Analysis")
-    chunk_data = analyze_chunk_scores(df)
-    
-    if not chunk_data.empty:
-        avg_scores = chunk_data.groupby('file')['score'].agg(['mean', 'count']).reset_index()
-        avg_scores = avg_scores.sort_values('mean', ascending=False)
+def display_chunk_analysis(data: List[Dict]):
+    """Display chunk analysis using Altair"""
+    scores = process_chunk_scores(data)
+    if scores:
+        # Aggregate scores
+        score_dict = defaultdict(list)
+        for score, file in scores:
+            score_dict[file].append(score)
+            
+        # Calculate averages
+        avg_scores = [
+            {"file": file, "avg_score": sum(scores)/len(scores), 
+             "count": len(scores)}
+            for file, scores in score_dict.items()
+        ]
         
-        fig = px.bar(avg_scores, 
-                     x='file', 
-                     y='mean',
-                     color='count',
-                     title="Average Relevance Score by Document",
-                     labels={'mean': 'Average Score', 
-                            'file': 'Document', 
-                            'count': 'Times Used'})
-        st.plotly_chart(fig)
-
-        fig = px.histogram(chunk_data, 
-                          x='score',
-                          nbins=20,
-                          title="Distribution of Relevance Scores",
-                          labels={'score': 'Relevance Score', 
-                                 'count': 'Frequency'})
-        st.plotly_chart(fig)
-
-def display_response_times(df):
-    st.subheader("Response Time Analysis")
-    if 'time' in df.columns:
-        df['time'] = pd.to_datetime(df['time'], format='%H:%M:%S').dt.time
-        response_times = df.groupby(df['date'].dt.date)['time'].count().reset_index()
-        
-        fig = px.line(response_times,
-                      x='date',
-                      y='time',
-                      title="Responses per Day",
-                      labels={'date': 'Date', 
-                             'time': 'Number of Responses'})
-        st.plotly_chart(fig)
-
-def display_user_interactions(df):
-    st.subheader("User Interaction Patterns")
-    user_stats = df.groupby('name').agg({
-        'question': 'count',
-        'date': 'nunique'
-    }).reset_index()
-    user_stats.columns = ['User', 'Total Questions', 'Active Days']
-    
-    fig = px.bar(user_stats,
-                 x='User',
-                 y=['Total Questions', 'Active Days'],
-                 title="User Engagement Metrics",
-                 barmode='group')
-    st.plotly_chart(fig)
-
-def create_performance_dashboard(df):
-    st.header("System Performance Analytics")
-    
-    col1, col2 = st.columns(2)
-    with col1:
-        date_range = st.date_input(
-            "Select Date Range",
-            value=(
-                datetime.now() - timedelta(days=7),
-                datetime.now()
-            )
+        # Create Altair chart
+        chart = alt.Chart(avg_scores).mark_bar().encode(
+            x='file:N',
+            y='avg_score:Q',
+            color='count:Q'
+        ).properties(
+            title="Average Relevance Score by Document"
         )
-    
-    with col2:
-        metrics_type = st.selectbox(
-            "Metrics Type",
-            ["All", "Chunk Scores", "Response Times", "User Interactions"]
-        )
+        st.altair_chart(chart)
 
-    if metrics_type in ["All", "Chunk Scores"]:
-        display_chunk_analysis(df)
+def display_user_interactions(data: List[Dict]):
+    """Display user interactions using Altair"""
+    user_stats = defaultdict(lambda: {"questions": 0, "days": set()})
     
-    if metrics_type in ["All", "Response Times"]:
-        display_response_times(df)
+    for row in data:
+        name = row['name']
+        user_stats[name]["questions"] += 1
+        user_stats[name]["days"].add(row['date'])
     
-    if metrics_type in ["All", "User Interactions"]:
-        display_user_interactions(df)
-
-def create_document_usage_analysis(df):
-    st.header("Document Usage Analysis")
+    user_data = [
+        {"user": name, "questions": stats["questions"], 
+         "active_days": len(stats["days"])}
+        for name, stats in user_stats.items()
+    ]
     
-    doc_usage = defaultdict(int)
-    for files in df['unique_files'].dropna():
-        for doc in str(files).split(' - '):
-            doc_usage[doc.strip()] += 1
-    
-    doc_df = pd.DataFrame({
-        'document': list(doc_usage.keys()),
-        'usage_count': list(doc_usage.values())
-    }).sort_values('usage_count', ascending=False)
-    
-    fig = px.bar(doc_df,
-                 x='document',
-                 y='usage_count',
-                 title="Document Usage Frequency",
-                 labels={'document': 'Document', 
-                        'usage_count': 'Times Used'})
-    fig.update_xaxes(tickangle=45)
-    st.plotly_chart(fig)
-    
-    st.subheader("Document Co-occurrence Analysis")
-    doc_cooccurrence = defaultdict(lambda: defaultdict(int))
-    for files in df['unique_files'].dropna():
-        docs = [doc.strip() for doc in str(files).split(' - ')]
-        for i, doc1 in enumerate(docs):
-            for doc2 in docs[i+1:]:
-                doc_cooccurrence[doc1][doc2] += 1
-                doc_cooccurrence[doc2][doc1] += 1
-    
-    docs = sorted(list(doc_usage.keys()))
-    matrix = [[doc_cooccurrence[doc1][doc2] for doc2 in docs] for doc1 in docs]
-    
-    fig = go.Figure(data=go.Heatmap(
-        z=matrix,
-        x=docs,
-        y=docs,
-        colorscale='Viridis'
-    ))
-    fig.update_layout(
-        title="Document Co-occurrence Matrix",
-        xaxis_tickangle=45
+    chart = alt.Chart(user_data).mark_bar().encode(
+        x='user:N',
+        y='questions:Q'
+    ).properties(
+        title="Questions per User"
     )
-    st.plotly_chart(fig)
+    st.altair_chart(chart)
 
-def create_user_analysis(df):
-    st.header("User Interaction Analysis")
+def create_document_usage_analysis(data: List[Dict]):
+    """Analyze document usage with minimal memory footprint"""
+    doc_usage = defaultdict(int)
     
-    st.subheader("User Activity Timeline")
-    user_activity = df.groupby(['date', 'name']).size().reset_index(name='questions')
-    fig = px.line(user_activity, 
-                  x='date', 
-                  y='questions', 
-                  color='name',
-                  title="Questions per User Over Time")
-    st.plotly_chart(fig)
+    for row in data:
+        if 'unique_files' in row and row['unique_files']:
+            for doc in str(row['unique_files']).split(' - '):
+                doc_usage[doc.strip()] += 1
     
-    st.subheader("User Engagement Metrics")
-    user_metrics = df.groupby('name').agg({
-        'question': ['count', 'max'],
-        'date': 'nunique'
-    }).reset_index()
-    user_metrics.columns = ['User', 'Total Questions', 'Longest Question', 'Active Days']
-    st.dataframe(user_metrics)
+    chart_data = [
+        {"document": doc, "count": count}
+        for doc, count in sorted(doc_usage.items(), 
+                               key=lambda x: x[1], reverse=True)[:10]
+    ]
     
-    st.subheader("Response Complexity by User")
-    df['response_length'] = df['response'].str.len()
-    avg_response_length = df.groupby('name')['response_length'].mean().reset_index()
-    fig = px.bar(avg_response_length,
-                 x='name',
-                 y='response_length',
-                 title="Average Response Length by User",
-                 labels={'response_length': 'Average Characters', 
-                        'name': 'User'})
-    st.plotly_chart(fig)
+    chart = alt.Chart(chart_data).mark_bar().encode(
+        x='document:N',
+        y='count:Q'
+    ).properties(
+        title="Top 10 Most Used Documents"
+    )
+    st.altair_chart(chart)
+
+def cleanup_memory():
+    """Force garbage collection"""
+    gc.collect()
 
 def main():
     st.set_page_config(page_title="Admin Dashboard", layout="wide")
     
     if not check_password():
         st.stop()
-    
-    st.title("PGaaS Admin Dashboard")
+        
+    st.title("PGaaS Admin Dashboard (Optimized)")
     
     script_dir = os.path.dirname(os.path.abspath(__file__))
     logs_dir = os.path.join(script_dir, "logs")
-    df = load_response_data(logs_dir)
     
-    if df.empty:
+    with st.spinner("Loading data..."):
+        data = load_response_data(logs_dir)
+        
+    if not data:
         st.error("No data found in logs directory")
         return
-    
-    tab1, tab2, tab3 = st.tabs(["Performance Metrics", 
-                               "Document Analysis", 
-                               "User Analysis"])
+        
+    # Use tabs for organization but load data only when tab is selected
+    tab1, tab2 = st.tabs(["Usage Metrics", "Document Analysis"])
     
     with tab1:
-        create_performance_dashboard(df)
-    
+        st.header("Usage Metrics")
+        display_user_interactions(data)
+        cleanup_memory()
+        
     with tab2:
-        create_document_usage_analysis(df)
-    
-    with tab3:
-        create_user_analysis(df)
+        st.header("Document Analysis")
+        create_document_usage_analysis(data)
+        cleanup_memory()
+        
+    # Cleanup at the end
+    cleanup_memory()
 
 if __name__ == "__main__":
     main()
