@@ -24,30 +24,64 @@ def check_password():
 
 @st.cache_data(ttl=CACHE_TTL)
 def load_response_data(logs_dir):
-    """Load data using CSV reader with minimal memory usage"""
-    data = []
+    """CSV loading with specific date format handling"""
+    all_data = []
+    
     for filename in os.listdir(logs_dir):
         if not filename.endswith('_response_log.csv'):
             continue
             
         file_path = os.path.join(logs_dir, filename)
         try:
-            with open(file_path, 'r') as f:
-                reader = csv.DictReader(f)
-                for row in reader:
-                    data.append({
-                        'name': row['name'],
-                        'date': datetime.strptime(row['date'], '%d-%m-%Y'),
-                        'question': row['question'],
-                        'response': row['response'],
-                        'unique_files': row['unique_files'].split(' - ') if row['unique_files'] else [],
-                        'chunk_scores': [row.get(f'chunk{i}_score', '') for i in range(1, 4)]
-                    })
-                    if len(data) >= MAX_RECORDS:
-                        break
+            # Read CSV with basic pandas
+            df = pd.read_csv(file_path)
+            
+            # Convert date using the correct format
+            df['date'] = pd.to_datetime(df['date'], format='%Y-%m-%d')
+            
+            # Convert time if present
+            if 'time' in df.columns:
+                df['time'] = pd.to_datetime(df['time'], format='%H:%M:%S').dt.time
+                
+            all_data.append(df)
         except Exception as e:
-            st.error(f"Error reading {filename}: {str(e)}")
-    return pd.DataFrame(data)
+            st.error(f"Error processing {filename}: {str(e)}")
+            continue
+    
+    if not all_data:
+        return pd.DataFrame()
+        
+    return pd.concat(all_data, ignore_index=True)
+
+def display_user_interactions(df):
+    """Display user interaction metrics using Altair with explicit type specifications"""
+    st.subheader("User Interaction Patterns")
+    
+    # Calculate user statistics
+    user_stats = df.groupby('name').agg({
+        'question': 'count',
+        'date': 'nunique'
+    }).reset_index()
+    
+    user_stats.columns = ['User', 'Total_Questions', 'Active_Days']
+    
+    # Create Altair chart with explicit type specifications
+    chart = alt.Chart(user_stats).mark_bar().encode(
+        x=alt.X('User:N', title='User'),  # :N for nominal (categorical) type
+        y=alt.Y('Total_Questions:Q', title='Number of Questions'),  # :Q for quantitative type
+        tooltip=[
+            alt.Tooltip('User:N', title='User'),
+            alt.Tooltip('Total_Questions:Q', title='Questions'),
+            alt.Tooltip('Active_Days:Q', title='Active Days')
+        ]
+    ).properties(
+        title='User Engagement',
+        width=600,
+        height=400
+    )
+    
+    st.altair_chart(chart, use_container_width=True)
+    st.dataframe(user_stats.sort_values('Total_Questions', ascending=False))
 
 def display_user_interactions(df):
     """Display user interaction metrics using Altair"""
