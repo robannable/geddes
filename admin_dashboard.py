@@ -35,7 +35,7 @@ def check_password():
         return True
 
 def load_response_data(logs_dir):
-    """Load and process all response logs without pyarrow dependency"""
+    """Load and process all response logs - Pi compatible version"""
     all_data = []
     
     for filename in os.listdir(logs_dir):
@@ -43,46 +43,48 @@ def load_response_data(logs_dir):
             continue
             
         file_path = os.path.join(logs_dir, filename)
-        success = False
         
-        # Try different encodings
-        encodings = ['utf-8', 'windows-1252', 'latin1']
-        
-        for encoding in encodings:
-            if success:
-                break
-                
+        try:
+            # Basic CSV reading with explicit engine setting
+            df = pd.read_csv(
+                file_path,
+                encoding='utf-8',
+                engine='python',  # Force python engine
+                on_bad_lines='warn'
+            )
+            
+            # Handle date parsing
             try:
-                # Explicitly avoid pyarrow
+                sample_date = df['date'].iloc[0]
+                if '-' in sample_date:
+                    if sample_date.split('-')[0].isdigit() and len(sample_date.split('-')[0]) == 2:
+                        df['date'] = pd.to_datetime(df['date'], format='%d-%m-%Y')
+                    else:
+                        df['date'] = pd.to_datetime(df['date'], format='%Y-%m-%d')
+                else:
+                    df['date'] = pd.to_datetime(df['date'])
+            except Exception as date_error:
+                st.warning(f"Date parsing issue in {filename}: {str(date_error)}. Using flexible parser.")
+                df['date'] = pd.to_datetime(df['date'])
+            
+            all_data.append(df)
+            
+        except UnicodeDecodeError:
+            try:
+                # Fallback to different encoding
                 df = pd.read_csv(
                     file_path,
-                    encoding=encoding,
+                    encoding='latin1',
                     engine='python',
-                    use_nullable_dtypes=False  # This prevents pyarrow usage
+                    on_bad_lines='warn'
                 )
-                
-                # Handle date parsing
-                try:
-                    sample_date = df['date'].iloc[0]
-                    if '-' in sample_date:
-                        if sample_date.split('-')[0].isdigit() and len(sample_date.split('-')[0]) == 2:
-                            df['date'] = pd.to_datetime(df['date'], format='%d-%m-%Y')
-                        else:
-                            df['date'] = pd.to_datetime(df['date'], format='%Y-%m-%d')
-                    else:
-                        df['date'] = pd.to_datetime(df['date'])
-                except Exception as date_error:
-                    st.warning(f"Date parsing issue in {filename}: {str(date_error)}. Using flexible parser.")
-                    df['date'] = pd.to_datetime(df['date'])
-                
                 all_data.append(df)
-                success = True
-                
-            except UnicodeDecodeError:
-                continue
             except Exception as e:
-                st.error(f"Error processing {filename} with {encoding} encoding: {str(e)}")
+                st.error(f"Error processing {filename}: {str(e)}")
                 continue
+        except Exception as e:
+            st.error(f"Error processing {filename}: {str(e)}")
+            continue
     
     if not all_data:
         st.warning("No data files were successfully loaded")
