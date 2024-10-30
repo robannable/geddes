@@ -32,35 +32,85 @@ def check_password():
         return True
 
 def load_response_data(logs_dir):
-    """Load and process all response logs with simplified CSV loading"""
+    """Load and process all response logs with comprehensive error handling
+    - Handles different encodings
+    - Handles multiple date formats
+    - Works without pyarrow dependency
+    - Provides detailed error reporting
+    """
     all_data = []
     
     for filename in os.listdir(logs_dir):
-        if filename.endswith('_response_log.csv'):
-            file_path = os.path.join(logs_dir, filename)
+        if not filename.endswith('_response_log.csv'):
+            continue
+            
+        file_path = os.path.join(logs_dir, filename)
+        success = False
+        
+        # Try different encodings
+        encodings = ['utf-8', 'windows-1252', 'latin1']
+        
+        for encoding in encodings:
+            if success:
+                break
+                
             try:
-                # Simple CSV reading without extra options
+                # Basic CSV reading with minimal dependencies
                 df = pd.read_csv(
-                    file_path, 
-                    encoding='utf-8',
-                    engine='python'
+                    file_path,
+                    encoding=encoding,
+                    engine='python'  # More compatible than 'c' engine
                 )
                 
+                # Handle date parsing with multiple format attempts
                 try:
-                    df['date'] = pd.to_datetime(df['date'], format='%Y-%m-%d')
-                except ValueError:
-                    try:
-                        df['date'] = pd.to_datetime(df['date'], format='%d-%m-%Y', dayfirst=True)
-                    except ValueError:
-                        df['date'] = pd.to_datetime(df['date'], format='mixed')
+                    # Try to detect format based on first row
+                    sample_date = df['date'].iloc[0]
+                    if '-' in sample_date:
+                        if sample_date.split('-')[0].isdigit() and len(sample_date.split('-')[0]) == 2:
+                            # DD-MM-YYYY format
+                            df['date'] = pd.to_datetime(df['date'], format='%d-%m-%Y')
+                        else:
+                            # YYYY-MM-DD format
+                            df['date'] = pd.to_datetime(df['date'], format='%Y-%m-%d')
+                    else:
+                        # Fallback to flexible parser
+                        df['date'] = pd.to_datetime(df['date'])
+                except Exception as date_error:
+                    st.warning(f"Date parsing issue in {filename}: {str(date_error)}. Using flexible parser.")
+                    df['date'] = pd.to_datetime(df['date'], format='mixed')
+                
                 all_data.append(df)
+                success = True
+                
+            except UnicodeDecodeError:
+                continue  # Try next encoding
             except Exception as e:
-                st.error(f"Error processing {filename}: {str(e)}")
+                st.error(f"Error processing {filename} with {encoding} encoding: {str(e)}")
                 continue
+        
+        if not success:
+            st.error(f"Failed to process {filename} with any encoding")
     
-    if all_data:
-        return pd.concat(all_data, ignore_index=True)
-    return pd.DataFrame()
+    if not all_data:
+        st.warning("No data files were successfully loaded")
+        return pd.DataFrame()
+    
+    try:
+        # Combine all dataframes
+        combined_df = pd.concat(all_data, ignore_index=True)
+        
+        # Basic data validation
+        expected_columns = {'date', 'name', 'question', 'response', 'unique_files'}
+        missing_columns = expected_columns - set(combined_df.columns)
+        if missing_columns:
+            st.warning(f"Missing expected columns: {missing_columns}")
+        
+        return combined_df
+        
+    except Exception as e:
+        st.error(f"Error combining data: {str(e)}")
+        return pd.DataFrame()
 
 def analyze_chunk_scores(df):
     """Analyze document chunk relevance scores"""
