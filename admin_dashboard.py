@@ -32,19 +32,18 @@ def check_password():
         return True
 
 def load_response_data(logs_dir):
-    """Load and process all response logs without pyarrow dependency"""
+    """Load and process all response logs with simplified CSV loading"""
     all_data = []
     
     for filename in os.listdir(logs_dir):
         if filename.endswith('_response_log.csv'):
             file_path = os.path.join(logs_dir, filename)
             try:
-                # Use basic CSV reading
+                # Simple CSV reading without extra options
                 df = pd.read_csv(
                     file_path, 
                     encoding='utf-8',
-                    engine='python',  # Use python engine instead of C
-                    storage_options={'use_nullable_dtypes': False}  # Avoid pyarrow requirement
+                    engine='python'
                 )
                 
                 try:
