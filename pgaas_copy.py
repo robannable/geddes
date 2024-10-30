@@ -11,6 +11,8 @@ import pygame
 import os
 import csv
 from datetime import datetime
+from dataclasses import dataclass
+from typing import List, Dict
 from pypdf import PdfReader
 from langchain.text_splitter import CharacterTextSplitter
 import pytesseract
@@ -53,6 +55,52 @@ pygame.mixer.init()
 
 # Load sound file
 ding_sound = pygame.mixer.Sound(os.path.join(sound_dir, 'ding2.wav'))
+
+# Add these classes after your existing imports but before any function definitions
+@dataclass
+class ContextItem:
+    content: str
+    timestamp: datetime  # Changed from datetime.datetime
+    source: str
+    relevance_score: float = 0.0
+
+class EnhancedContextManager:
+    def __init__(self, max_memory_items: int = 10):
+        self.max_memory_items = max_memory_items
+        self.conversation_memory: List[ContextItem] = []
+        self.context_weights = {
+            'student_specific': 1.5,
+            'recent_conversation': 1.3,
+            'historical': 1.2,
+            'general': 1.0
+        }
+    
+    def add_conversation(self, content: str, source: str):
+        context_item = ContextItem(
+            content=content,
+            timestamp=datetime.now(),  # Changed from datetime.datetime.now()
+            source=source
+        )
+        self.conversation_memory.append(context_item)
+        if len(self.conversation_memory) > self.max_memory_items:
+            self.conversation_memory.pop(0)
+    
+    def get_weighted_context(self, query: str, user_name: str) -> Dict[str, List[ContextItem]]:
+        categorized_context = {
+            'student_specific': [],
+            'recent_conversation': [],
+            'historical': [],
+            'general': []
+        }
+        
+        # Categorize conversation memory
+        for item in self.conversation_memory:
+            if user_name.lower() in item.source.lower():
+                categorized_context['student_specific'].append(item)
+            else:
+                categorized_context['recent_conversation'].append(item)
+        
+        return categorized_context
 
 # Set up API
 class PerplexityAPIHandler:
@@ -245,6 +293,29 @@ def compute_tfidf_matrix(document_chunks):
 document_chunks_with_filenames = load_documents(['documents', 'history', 'students'])
 vectorizer, tfidf_matrix = compute_tfidf_matrix(document_chunks_with_filenames)
 
+# Add a context weighting system to prioritize different types of documents
+def weight_context_chunks(prompt, context_chunks_with_filenames, vectorizer, tfidf_matrix):
+    """Weight context chunks based on document type and relevance"""
+    prompt_vector = vectorizer.transform([prompt])
+    base_similarities = cosine_similarity(prompt_vector, tfidf_matrix).flatten()
+    
+    weighted_similarities = []
+    for i, (chunk, filename) in enumerate(context_chunks_with_filenames):
+        # Base similarity score
+        score = base_similarities[i]
+        
+        # Apply weights based on document type
+        if 'students' in filename.lower():
+            score *= 1.5  # Prioritize student-specific content
+        elif 'history' in filename.lower():
+            score *= 1.2  # Give preference to historical context
+        elif any(term in chunk.lower() for term in ['project', 'research', 'study']):
+            score *= 1.3  # Boost project-related content
+            
+        weighted_similarities.append(score)
+    
+    return np.array(weighted_similarities)
+
 def initialize_log_files():
     logs_dir = os.path.join(script_dir, "logs")
     os.makedirs(logs_dir, exist_ok=True)
@@ -395,12 +466,106 @@ def load_today_history():
     else:
         logging.info("No history file found for today")
         return ""
+    
+def get_temporal_context(today_history, max_history_chunks=5):
+    """Process conversation history with temporal weighting"""
+    history_chunks = today_history.split("##")
+    
+    # Sort chunks by timestamp (assuming they start with timestamp)
+    history_chunks.sort(key=lambda x: x.split("|")[0] if "|" in x else "", reverse=True)
+    
+    # Take most recent chunks and apply temporal weighting
+    recent_chunks = []
+    for i, chunk in enumerate(history_chunks[:max_history_chunks]):
+        temporal_weight = 1 / (i + 1)  # More recent = higher weight
+        recent_chunks.append({
+            'content': chunk,
+            'weight': temporal_weight
+        })
+    
+    return recent_chunks    
+
+def assemble_enhanced_context(
+    user_name: str,
+    prompt: str,
+    context_manager: EnhancedContextManager,
+    top_chunks: List[tuple],
+    today_history: str
+) -> str:
+    """
+    Assembles context with improved structure and weighting
+    
+    Args:
+        user_name: Name of the current user
+        prompt: Current user query
+        context_manager: Instance of EnhancedContextManager
+        top_chunks: List of (chunk, filename) tuples from RAG
+        today_history: Today's conversation history
+    
+    Returns:
+        Structured context string for the LLM
+    """
+    # Get weighted context from memory
+    categorized_context = context_manager.get_weighted_context(prompt, user_name)
+    
+    # Process RAG chunks
+    for chunk, filename in top_chunks:
+        context_item = ContextItem(
+            content=chunk,
+            timestamp=datetime.now(),
+            source=filename
+        )
+        
+        if user_name.lower() in filename.lower():
+            categorized_context['student_specific'].append(context_item)
+        elif 'history' in filename.lower():
+            categorized_context['historical'].append(context_item)
+        else:
+            categorized_context['general'].append(context_item)
+    
+    # Assemble final context
+    context_sections = []
+    
+    # Student-specific context (highest priority)
+    if categorized_context['student_specific']:
+        context_sections.append("Student-Specific Context:")
+        context_sections.extend([
+            f"- {item.content}" 
+            for item in categorized_context['student_specific'][:3]
+        ])
+    
+    # Recent conversations
+    if categorized_context['recent_conversation']:
+        context_sections.append("\nRecent Relevant Discussions:")
+        context_sections.extend([
+            f"- {item.content}" 
+            for item in sorted(
+                categorized_context['recent_conversation'],
+                key=lambda x: x.timestamp,
+                reverse=True
+            )[:3]
+        ])
+    
+    # Historical context
+    if categorized_context['historical']:
+        context_sections.append("\nHistorical Background:")
+        context_sections.extend([
+            f"- {item.content}" 
+            for item in categorized_context['historical'][:2]
+        ])
+    
+    # General knowledge
+    if categorized_context['general']:
+        context_sections.append("\nGeneral Reference:")
+        context_sections.extend([
+            f"- {item.content}" 
+            for item in categorized_context['general'][:2]
+        ])
+    
+    return "\n".join(context_sections)
 
 def get_perplexity_response(user_name, prompt):
-    # Load today's history explicitly
     today_history = load_today_history()
-    
-    # Initialize API handler with retry strategy
     api_handler = PerplexityAPIHandler(st.secrets['PERPLEXITY_API_KEY'])
     
     try:
@@ -415,33 +580,32 @@ def get_perplexity_response(user_name, prompt):
         context_chunks_with_filenames = [document_chunks_with_filenames[i] for i in top_indices]
         context_chunks = [chunk for chunk, _ in context_chunks_with_filenames]
         context_filenames_list = [filename for _, filename in context_chunks_with_filenames]
-        context_text = "\n".join(context_chunks)
-
-        # Build context layers
-        history_context = "\n".join([chunk for chunk, filename in document_chunks_with_filenames 
-                                   if 'history' in filename.lower()])
         
-        # Add student context with normalized name matching
-        normalized_name = user_name.lower().strip()
-        student_context = "\n".join([chunk for chunk, filename in document_chunks_with_filenames 
-                                   if 'students' in filename.lower() and 
-                                   normalized_name in filename.lower()])
-
+        # Get enhanced context
+        enhanced_context = assemble_enhanced_context(
+            user_name=user_name,
+            prompt=prompt,
+            context_manager=st.session_state.context_manager,
+            top_chunks=context_chunks_with_filenames,
+            today_history=today_history
+        )
+        
+        # Update context memory
+        st.session_state.context_manager.add_conversation(
+            content=prompt,
+            source=f"user_{user_name}"
+        )
+        
         # Prepare API request
         character_prompt = get_patrick_prompt()
-        user_message = f"""Context: {context_text}
-Previous conversation history: {history_context}
-Today's conversations: {today_history}
-Student project context: {student_context}
-Instructions: The above context includes general reference material, conversation history, 
-and specific information about the student's project proposal. Use this information to:
-1. Provide responses that connect to the student's specific project interests
-2. Draw parallels between historical concepts and the student's research
-3. Maintain consistency with previous conversations
-4. Suggest relevant connections between their project and Geddes' work
-User's name: {user_name}
-Current date: {datetime.now().strftime("%d-%m-%Y")}
-Question: {prompt}"""
+        user_message = f"""
+        Enhanced Context:
+        {enhanced_context}
+        
+        User's name: {user_name}
+        Current date: {datetime.now().strftime("%d-%m-%Y")}
+        Question: {prompt}
+        """
 
         data = {
             "model": "llama-3.1-70b-instruct",
@@ -455,11 +619,12 @@ Question: {prompt}"""
         response_json = api_handler.make_request(data)
         
         if "choices" in response_json and len(response_json["choices"]) > 0:
-            chunk_info = [f"{filename} (chunk {i+1}, score: {cosine_similarities[top_indices[i]]:.4f})" 
-                         for i, filename in enumerate(context_filenames_list)]
-            return response_json["choices"][0]["message"]["content"], list(set(context_filenames_list)), chunk_info
-        
-        return "Error: Unexpected response format from API.", [], []
+            # Create chunk info with scores
+            chunk_info = [
+                f"{filename} (chunk {i+1}, score: {cosine_similarities[top_indices[i]]:.4f})" 
+                for i, filename in enumerate(context_filenames_list)
+            ]
+            return response_json["choices"][0]["message"]["content"], context_filenames_list, chunk_info
 
     except ConnectionError as e:
         return ("I apologize, but I'm having trouble connecting to my knowledge base. "
@@ -470,6 +635,8 @@ Question: {prompt}"""
     except Exception as e:
         return f"An unexpected error occurred: {str(e)}", [], []
 
+if 'context_manager' not in st.session_state:
+    st.session_state.context_manager = EnhancedContextManager()
 
 # Streamlit UI
 st.title("The Ghost of Geddes...")
