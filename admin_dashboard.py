@@ -6,9 +6,8 @@ import csv
 from datetime import datetime, timedelta
 from collections import defaultdict
 import altair as alt
+import pandas as pd
 import gc
-from typing import Dict, List
-import html
 
 # Configuration
 CACHE_TTL = 3600  # 1 hour
@@ -24,8 +23,8 @@ def check_password():
     return st.session_state.password_correct
 
 @st.cache_data(ttl=CACHE_TTL)
-def load_response_data(logs_dir: str) -> List[Dict]:
-    """Load data using CSV reader instead of pandas"""
+def load_response_data(logs_dir):
+    """Load data using CSV reader with minimal memory usage"""
     data = []
     for filename in os.listdir(logs_dir):
         if not filename.endswith('_response_log.csv'):
@@ -39,7 +38,6 @@ def load_response_data(logs_dir: str) -> List[Dict]:
                     data.append({
                         'name': row['name'],
                         'date': datetime.strptime(row['date'], '%d-%m-%Y'),
-                        'time': row['time'],
                         'question': row['question'],
                         'response': row['response'],
                         'unique_files': row['unique_files'].split(' - ') if row['unique_files'] else [],
@@ -49,86 +47,73 @@ def load_response_data(logs_dir: str) -> List[Dict]:
                         break
         except Exception as e:
             st.error(f"Error reading {filename}: {str(e)}")
-    return data
+    return pd.DataFrame(data)
 
-def create_user_metrics(data: List[Dict]) -> List[Dict]:
-    """Calculate user metrics"""
-    user_stats = defaultdict(lambda: {'questions': 0, 'active_days': set()})
-    
-    for row in data:
-        name = row['name']
-        user_stats[name]['questions'] += 1
-        user_stats[name]['active_days'].add(row['date'].date())
-    
-    return [
-        {
-            'user': name,
-            'questions': stats['questions'],
-            'active_days': len(stats['active_days'])
-        }
-        for name, stats in user_stats.items()
-    ]
-
-def display_user_analysis(data: List[Dict]):
+def display_user_interactions(df):
     """Display user interaction metrics using Altair"""
-    user_metrics = create_user_metrics(data)
+    st.subheader("User Interaction Patterns")
     
-    # Questions per user chart
-    chart = alt.Chart(user_metrics).mark_bar().encode(
-        x=alt.X('user:N', title='User'),
-        y=alt.Y('questions:Q', title='Number of Questions'),
-        tooltip=['user', 'questions', 'active_days']
+    # Calculate user statistics
+    user_stats = df.groupby('name').agg({
+        'question': 'count',
+        'date': 'nunique'
+    }).reset_index()
+    user_stats.columns = ['User', 'Total_Questions', 'Active_Days']
+    
+    # Create Altair chart
+    chart = alt.Chart(user_stats).mark_bar().encode(
+        x=alt.X('User:N', title='User'),
+        y=alt.Y('Total_Questions:Q', title='Number of Questions'),
+        tooltip=['User', 'Total_Questions', 'Active_Days']
     ).properties(
         title='User Engagement',
         width=600
     )
     
     st.altair_chart(chart, use_container_width=True)
-    
-    # Display metrics table
-    st.dataframe(user_metrics)
+    st.dataframe(user_stats)
 
-def analyze_document_usage(data: List[Dict]):
+def create_document_usage_analysis(df):
     """Analyze document usage patterns"""
-    doc_usage = defaultdict(int)
+    st.header("Document Usage Analysis")
     
-    for row in data:
-        for doc in row['unique_files']:
+    # Calculate document usage
+    doc_usage = defaultdict(int)
+    for files in df['unique_files'].dropna():
+        for doc in files:
             doc_usage[doc.strip()] += 1
     
-    usage_data = [
-        {'document': doc, 'count': count}
-        for doc, count in sorted(doc_usage.items(), 
-                               key=lambda x: x[1], reverse=True)[:10]
-    ]
+    # Create DataFrame for visualization
+    doc_df = pd.DataFrame({
+        'Document': list(doc_usage.keys()),
+        'Usage_Count': list(doc_usage.values())
+    }).sort_values('Usage_Count', ascending=False)
     
-    chart = alt.Chart(usage_data).mark_bar().encode(
-        x=alt.X('document:N', title='Document'),
-        y=alt.Y('count:Q', title='Usage Count'),
-        tooltip=['document', 'count']
+    # Create Altair chart
+    chart = alt.Chart(doc_df).mark_bar().encode(
+        x=alt.X('Document:N', sort='-y'),
+        y=alt.Y('Usage_Count:Q'),
+        tooltip=['Document', 'Usage_Count']
     ).properties(
-        title='Top 10 Most Used Documents',
+        title='Document Usage Frequency',
         width=600
     )
     
     st.altair_chart(chart, use_container_width=True)
 
-def analyze_response_patterns(data: List[Dict]):
+def analyze_response_patterns(df):
     """Analyze response patterns over time"""
-    daily_counts = defaultdict(int)
+    st.header("Response Patterns")
     
-    for row in data:
-        daily_counts[row['date'].date()] += 1
+    # Calculate daily response counts
+    daily_counts = df.groupby(df['date'].dt.date).size().reset_index()
+    daily_counts.columns = ['Date', 'Count']
     
-    time_data = [
-        {'date': date, 'responses': count}
-        for date, count in sorted(daily_counts.items())
-    ]
-    
-    chart = alt.Chart(time_data).mark_line().encode(
-        x=alt.X('date:T', title='Date'),
-        y=alt.Y('responses:Q', title='Number of Responses'),
-        tooltip=['date', 'responses']
+    # Create Altair chart
+    chart = alt.Chart(daily_counts).mark_line().encode(
+        x=alt.X('Date:T'),
+        y=alt.Y('Count:Q'),
+        tooltip=['Date', 'Count']
     ).properties(
         title='Daily Response Pattern',
         width=600
@@ -152,9 +137,9 @@ def main():
     logs_dir = os.path.join(script_dir, "logs")
     
     with st.spinner("Loading data..."):
-        data = load_response_data(logs_dir)
+        df = load_response_data(logs_dir)
         
-    if not data:
+    if df.empty:
         st.error("No data found in logs directory")
         return
         
@@ -166,18 +151,15 @@ def main():
     ])
     
     with tab1:
-        st.header("User Analysis")
-        display_user_analysis(data)
+        display_user_interactions(df)
         cleanup_memory()
         
     with tab2:
-        st.header("Document Analysis")
-        analyze_document_usage(data)
+        create_document_usage_analysis(df)
         cleanup_memory()
         
     with tab3:
-        st.header("Response Patterns")
-        analyze_response_patterns(data)
+        analyze_response_patterns(df)
         cleanup_memory()
     
     # Final cleanup
