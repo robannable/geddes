@@ -35,7 +35,7 @@ def check_password():
         return True
 
 def load_response_data(logs_dir):
-    """Load and process all response logs - Pi compatible version"""
+    """CSV loading with specific date format handling"""
     all_data = []
     
     for filename in os.listdir(logs_dir):
@@ -45,56 +45,26 @@ def load_response_data(logs_dir):
         file_path = os.path.join(logs_dir, filename)
         
         try:
-            # Basic CSV reading with explicit engine setting
-            df = pd.read_csv(
-                file_path,
-                encoding='utf-8',
-                engine='python',  # Force python engine
-                on_bad_lines='warn'
-            )
+            # Basic CSV reading
+            df = pd.read_csv(file_path)
             
-            # Handle date parsing
-            try:
-                sample_date = df['date'].iloc[0]
-                if '-' in sample_date:
-                    if sample_date.split('-')[0].isdigit() and len(sample_date.split('-')[0]) == 2:
-                        df['date'] = pd.to_datetime(df['date'], format='%d-%m-%Y')
-                    else:
-                        df['date'] = pd.to_datetime(df['date'], format='%Y-%m-%d')
-                else:
-                    df['date'] = pd.to_datetime(df['date'])
-            except Exception as date_error:
-                st.warning(f"Date parsing issue in {filename}: {str(date_error)}. Using flexible parser.")
-                df['date'] = pd.to_datetime(df['date'])
+            # Convert date using the specific format from your CSV
+            df['date'] = pd.to_datetime(df['date'], format='%d-%m-%Y')
             
+            # Convert time if needed
+            if 'time' in df.columns:
+                df['time'] = pd.to_datetime(df['time'], format='%H:%M:%S').dt.time
+                
             all_data.append(df)
             
-        except UnicodeDecodeError:
-            try:
-                # Fallback to different encoding
-                df = pd.read_csv(
-                    file_path,
-                    encoding='latin1',
-                    engine='python',
-                    on_bad_lines='warn'
-                )
-                all_data.append(df)
-            except Exception as e:
-                st.error(f"Error processing {filename}: {str(e)}")
-                continue
         except Exception as e:
             st.error(f"Error processing {filename}: {str(e)}")
             continue
     
     if not all_data:
-        st.warning("No data files were successfully loaded")
         return pd.DataFrame()
     
-    try:
-        return pd.concat(all_data, ignore_index=True)
-    except Exception as e:
-        st.error(f"Error combining data: {str(e)}")
-        return pd.DataFrame()
+    return pd.concat(all_data, ignore_index=True)
 
 def analyze_chunk_scores(df):
     """Analyze document chunk relevance scores"""
