@@ -2,16 +2,14 @@
 
 import streamlit as st
 import pandas as pd
-import altair as alt
+import plotly.express as px
+import plotly.graph_objects as go
 from datetime import datetime, timedelta
 import json
+import csv
 import os
-import csv  # Add this import
 import numpy as np
 from collections import defaultdict
-
-# Force pandas to use the python engine and disable pyarrow
-pd.options.io.engine = "python"
 
 def check_password():
     """Returns `True` if the user had the correct password."""
@@ -35,72 +33,32 @@ def check_password():
         return True
 
 def load_response_data(logs_dir):
-    """Load and process all response logs with flexible date handling and proper CSV reading"""
+    """Load and process all response logs with flexible date handling"""
     all_data = []
     
     for filename in os.listdir(logs_dir):
-        if not filename.endswith('_response_log.csv'):
-            continue
-            
-        file_path = os.path.join(logs_dir, filename)
-        try:
-            # Read CSV with specific parameters to handle markdown text
-            df = pd.read_csv(
-                file_path,
-                encoding='utf-8',
-                quoting=csv.QUOTE_ALL,     # Quote all fields
-                escapechar='\\',           # Use backslash as escape character
-                on_bad_lines='warn'        # Warn about problematic lines
-            )
-            
-            # Flexible date parsing with multiple formats
+        if filename.endswith('_response_log.csv'):
+            file_path = os.path.join(logs_dir, filename)
             try:
-                df['date'] = pd.to_datetime(df['date'], format='%Y-%m-%d')
-            except ValueError:
+                df = pd.read_csv(file_path, encoding='utf-8')
+                # First try to parse as YYYY-MM-DD
                 try:
-                    df['date'] = pd.to_datetime(df['date'], format='%d-%m-%Y', dayfirst=True)
+                    df['date'] = pd.to_datetime(df['date'], format='%Y-%m-%d')
                 except ValueError:
-                    df['date'] = pd.to_datetime(df['date'], format='mixed')
-            
-            # Convert time if present
-            if 'time' in df.columns:
-                df['time'] = pd.to_datetime(df['time'], format='%H:%M:%S').dt.time
-                
-            # Handle markdown content in response column
-            if 'response' in df.columns:
-                df['response'] = df['response'].fillna('').astype(str)
-                
-            # Handle unique_files column
-            if 'unique_files' in df.columns:
-                df['unique_files'] = df['unique_files'].fillna('').astype(str)
-                
-            all_data.append(df)
-            
-        except pd.errors.EmptyDataError:
-            st.warning(f"Empty file: {filename}")
-            continue
-        except Exception as e:
-            st.error(f"Error processing {filename}: {str(e)}")
-            continue
+                    # If that fails, try DD-MM-YYYY
+                    try:
+                        df['date'] = pd.to_datetime(df['date'], format='%d-%m-%Y', dayfirst=True)
+                    except ValueError:
+                        # If both fail, use the mixed format parser
+                        df['date'] = pd.to_datetime(df['date'], format='mixed')
+                all_data.append(df)
+            except Exception as e:
+                st.error(f"Error processing {filename}: {str(e)}")
+                continue
     
-    if not all_data:
-        return pd.DataFrame()
-    
-    try:
-        # Combine all dataframes
-        combined_df = pd.concat(all_data, ignore_index=True)
-        
-        # Ensure all required columns exist
-        required_columns = ['name', 'date', 'question', 'response', 'unique_files']
-        for col in required_columns:
-            if col not in combined_df.columns:
-                combined_df[col] = ''
-        
-        return combined_df
-        
-    except Exception as e:
-        st.error(f"Error combining data: {str(e)}")
-        return pd.DataFrame()
+    if all_data:
+        return pd.concat(all_data, ignore_index=True)
+    return pd.DataFrame()
 
 def analyze_chunk_scores(df):
     """Analyze document chunk relevance scores"""
