@@ -1,0 +1,549 @@
+2024-10-25 15:15:15,311 - RAG Loading - Loaded Lock-PatrickGeddesconservative-1977.pdf in 4.33 seconds
+2024-10-25 15:15:15,480 - RAG Loading - Loaded Pageants, fairs and foklore.md in 0.06 seconds
+2024-10-25 15:15:43,523 - RAG Loading - Loaded Cities in Evolution - chapter 18 - city betterment.pdf in 27.99 seconds
+2024-10-25 15:15:44,170 - RAG Loading - Loaded Exhibit A - weeks 4-8.pdf in 0.61 seconds
+2024-10-25 15:15:44,226 - RAG Loading - Loaded Civics as Applied Sociology.txt in 0.05 seconds
+2024-10-25 15:15:54,773 - RAG Loading - Loaded Pages from Biopolis - Chapter 2.pdf in 10.46 seconds
+2024-10-25 15:15:56,699 - RAG Loading - Loaded Patrick Geddes says....pdf in 1.86 seconds
+2024-10-25 15:16:06,124 - RAG Loading - Loaded Thinking_Machine.png in 9.41 seconds
+2024-10-25 15:16:06,199 - RAG Loading - Loaded Site Analysis Topics - Folk, Work, Place.md in 0.06 seconds
+2024-10-25 15:16:06,218 - RAG Loading - Loaded ethnographic-observation.md in 0.02 seconds
+2024-10-25 15:16:27,255 - RAG Loading - Loaded The Cultural-ecological Imagination of Patrick Geddes - Hopeful Futures.pdf in 20.94 seconds
+2024-10-25 15:16:38,720 - RAG Loading - Loaded Cities in Evolution - chapter 17 - spirit of cities.pdf in 11.32 seconds
+2024-10-25 15:16:42,492 - RAG Loading - Loaded Ursula K. Le Guin — 97. Utopiyin, Utopiyang.pdf in 3.77 seconds
+2024-10-25 15:16:58,240 - RAG Loading - Loaded Cities in Evolution - chapter 13 - education for town planning.pdf in 15.71 seconds
+2024-10-25 15:16:59,641 - RAG Loading - Loaded Exhibit A - weeks 1-3.pdf in 1.39 seconds
+2024-10-25 15:17:03,837 - RAG Loading - Loaded Exhibit A - LLMs as tools for thought.pdf in 4.10 seconds
+2024-10-25 15:17:42,654 - RAG Loading - Loaded Cities in Evolution - chapter 12- town planning and civic exhibitions.pdf in 38.57 seconds
+2024-10-25 15:17:48,185 - RAG Loading - Loaded L6 studio brief 2024 - Exhibit A.pdf in 5.47 seconds
+2024-10-25 15:17:50,909 - RAG Loading - Loaded Cities in Evolution - conclusion.pdf in 2.71 seconds
+2024-10-25 15:18:00,220 - RAG Loading - Loaded Cities in Evolution - chapter 15 - the survey of cities.pdf in 9.30 seconds
+2024-10-25 15:18:31,357 - RAG Loading - Loaded Cities in Evolution - chapter 1.pdf in 31.02 seconds
+2024-10-25 15:18:45,350 - RAG Loading - Loaded Cities in Evolution - chapter 16 - survey for town planning.pdf in 13.90 seconds
+2024-10-25 15:19:05,030 - RAG Loading - Loaded Cities in Evolution - chapter 14 - study of cities.pdf in 19.59 seconds
+2024-10-25 15:19:05,126 - RAG Loading - Loaded North Edgbaston Ward Fact Sheet.md in 0.05 seconds
+2024-10-25 15:19:05,130 - RAG Loading - Directory documents: processed 24 files in 234.24 seconds
+2024-10-25 15:19:05,199 - RAG Loading - Loaded 21-10-2024_conversation_history.md in 0.04 seconds
+2024-10-25 15:19:05,226 - RAG Loading - Loaded 24-10-2024_conversation_history.md in 0.02 seconds
+2024-10-25 15:19:05,243 - RAG Loading - Loaded 22-10-2024_conversation_history.md in 0.01 seconds
+2024-10-25 15:19:05,265 - RAG Loading - Loaded 17-10-2024_conversation_history.md in 0.02 seconds
+2024-10-25 15:19:05,302 - RAG Loading - Loaded 23-10-2024_conversation_history.md in 0.03 seconds
+2024-10-25 15:19:05,304 - RAG Loading - Directory history: processed 5 files in 0.17 seconds
+2024-10-25 15:19:05,373 - RAG Loading - Loaded Vic_Reeves.txt in 0.04 seconds
+2024-10-25 15:19:05,392 - RAG Loading - Loaded Rob_Annable.txt in 0.02 seconds
+2024-10-25 15:19:05,394 - RAG Loading - Loaded .ipynb_checkpoints in 0.00 seconds
+2024-10-25 15:19:05,396 - RAG Loading - Directory students: processed 3 files in 0.08 seconds
+2024-10-25 15:19:05,444 - RAG Loading - Created a chunk of size 1153, which is longer than the specified 1000
+2024-10-25 15:19:05,448 - RAG Loading - Created a chunk of size 2304, which is longer than the specified 1000
+2024-10-25 15:19:05,453 - RAG Loading - Created a chunk of size 3306, which is longer than the specified 1000
+2024-10-25 15:19:05,457 - RAG Loading - Created a chunk of size 2142, which is longer than the specified 1000
+2024-10-25 15:19:05,459 - RAG Loading - Created a chunk of size 2904, which is longer than the specified 1000
+2024-10-25 15:19:05,464 - RAG Loading - Created a chunk of size 1859, which is longer than the specified 1000
+2024-10-25 15:19:05,464 - RAG Loading - Created a chunk of size 2822, which is longer than the specified 1000
+2024-10-25 15:19:05,465 - RAG Loading - Created a chunk of size 1717, which is longer than the specified 1000
+2024-10-25 15:19:05,467 - RAG Loading - Created a chunk of size 1425, which is longer than the specified 1000
+2024-10-25 15:19:05,469 - RAG Loading - Created a chunk of size 1276, which is longer than the specified 1000
+2024-10-25 15:19:05,472 - RAG Loading - Created a chunk of size 1576, which is longer than the specified 1000
+2024-10-25 15:19:05,475 - RAG Loading - Created a chunk of size 3368, which is longer than the specified 1000
+2024-10-25 15:19:05,479 - RAG Loading - Created a chunk of size 1035, which is longer than the specified 1000
+2024-10-25 15:19:05,482 - RAG Loading - Created a chunk of size 1591, which is longer than the specified 1000
+2024-10-25 15:19:05,483 - RAG Loading - Created a chunk of size 1440, which is longer than the specified 1000
+2024-10-25 15:19:05,487 - RAG Loading - Created a chunk of size 1669, which is longer than the specified 1000
+2024-10-25 15:19:05,489 - RAG Loading - Created a chunk of size 4739, which is longer than the specified 1000
+2024-10-25 15:19:05,492 - RAG Loading - Created a chunk of size 1089, which is longer than the specified 1000
+2024-10-25 15:19:05,493 - RAG Loading - Created a chunk of size 2372, which is longer than the specified 1000
+2024-10-25 15:19:05,495 - RAG Loading - Created a chunk of size 2402, which is longer than the specified 1000
+2024-10-25 15:19:05,499 - RAG Loading - Created a chunk of size 4173, which is longer than the specified 1000
+2024-10-25 15:19:05,500 - RAG Loading - Created a chunk of size 1143, which is longer than the specified 1000
+2024-10-25 15:19:05,505 - RAG Loading - Created a chunk of size 1204, which is longer than the specified 1000
+2024-10-25 15:19:05,506 - RAG Loading - Created a chunk of size 1025, which is longer than the specified 1000
+2024-10-25 15:19:05,509 - RAG Loading - Created a chunk of size 1473, which is longer than the specified 1000
+2024-10-25 15:19:05,511 - RAG Loading - Created a chunk of size 2806, which is longer than the specified 1000
+2024-10-25 15:19:05,514 - RAG Loading - Created a chunk of size 3419, which is longer than the specified 1000
+2024-10-25 15:19:05,516 - RAG Loading - Created a chunk of size 1259, which is longer than the specified 1000
+2024-10-25 15:19:05,518 - RAG Loading - Created a chunk of size 2123, which is longer than the specified 1000
+2024-10-25 15:19:05,519 - RAG Loading - Created a chunk of size 1944, which is longer than the specified 1000
+2024-10-25 15:19:05,520 - RAG Loading - Created a chunk of size 1597, which is longer than the specified 1000
+2024-10-25 15:19:05,522 - RAG Loading - Created a chunk of size 1208, which is longer than the specified 1000
+2024-10-25 15:19:05,523 - RAG Loading - Created a chunk of size 1090, which is longer than the specified 1000
+2024-10-25 15:19:05,525 - RAG Loading - Created a chunk of size 1589, which is longer than the specified 1000
+2024-10-25 15:19:05,527 - RAG Loading - Created a chunk of size 3157, which is longer than the specified 1000
+2024-10-25 15:19:05,534 - RAG Loading - Created a chunk of size 1776, which is longer than the specified 1000
+2024-10-25 15:19:05,539 - RAG Loading - Created a chunk of size 1626, which is longer than the specified 1000
+2024-10-25 15:19:05,540 - RAG Loading - Created a chunk of size 1607, which is longer than the specified 1000
+2024-10-25 15:19:05,542 - RAG Loading - Created a chunk of size 4431, which is longer than the specified 1000
+2024-10-25 15:19:05,543 - RAG Loading - Created a chunk of size 1079, which is longer than the specified 1000
+2024-10-25 15:19:05,544 - RAG Loading - Created a chunk of size 1933, which is longer than the specified 1000
+2024-10-25 15:19:05,547 - RAG Loading - Created a chunk of size 1226, which is longer than the specified 1000
+2024-10-25 15:19:05,548 - RAG Loading - Created a chunk of size 1712, which is longer than the specified 1000
+2024-10-25 15:19:05,549 - RAG Loading - Created a chunk of size 2118, which is longer than the specified 1000
+2024-10-25 15:19:05,551 - RAG Loading - Created a chunk of size 2346, which is longer than the specified 1000
+2024-10-25 15:19:05,553 - RAG Loading - Created a chunk of size 1524, which is longer than the specified 1000
+2024-10-25 15:19:05,555 - RAG Loading - Created a chunk of size 1258, which is longer than the specified 1000
+2024-10-25 15:19:05,561 - RAG Loading - Created a chunk of size 1264, which is longer than the specified 1000
+2024-10-25 15:19:05,564 - RAG Loading - Created a chunk of size 2199, which is longer than the specified 1000
+2024-10-25 15:19:05,570 - RAG Loading - Created a chunk of size 1705, which is longer than the specified 1000
+2024-10-25 15:19:05,571 - RAG Loading - Created a chunk of size 1076, which is longer than the specified 1000
+2024-10-25 15:19:05,573 - RAG Loading - Created a chunk of size 1295, which is longer than the specified 1000
+2024-10-25 15:19:05,574 - RAG Loading - Created a chunk of size 1894, which is longer than the specified 1000
+2024-10-25 15:19:05,577 - RAG Loading - Created a chunk of size 1316, which is longer than the specified 1000
+2024-10-25 15:19:05,579 - RAG Loading - Created a chunk of size 3146, which is longer than the specified 1000
+2024-10-25 15:19:05,581 - RAG Loading - Created a chunk of size 1028, which is longer than the specified 1000
+2024-10-25 15:19:05,583 - RAG Loading - Created a chunk of size 1037, which is longer than the specified 1000
+2024-10-25 15:19:05,586 - RAG Loading - Created a chunk of size 1757, which is longer than the specified 1000
+2024-10-25 15:19:05,589 - RAG Loading - Created a chunk of size 1919, which is longer than the specified 1000
+2024-10-25 15:19:05,591 - RAG Loading - Created a chunk of size 1062, which is longer than the specified 1000
+2024-10-25 15:19:05,592 - RAG Loading - Created a chunk of size 1485, which is longer than the specified 1000
+2024-10-25 15:19:05,594 - RAG Loading - Created a chunk of size 1016, which is longer than the specified 1000
+2024-10-25 15:19:05,596 - RAG Loading - Created a chunk of size 1209, which is longer than the specified 1000
+2024-10-25 15:19:05,601 - RAG Loading - Created a chunk of size 1770, which is longer than the specified 1000
+2024-10-25 15:19:05,603 - RAG Loading - Created a chunk of size 1326, which is longer than the specified 1000
+2024-10-25 15:19:05,605 - RAG Loading - Created a chunk of size 3548, which is longer than the specified 1000
+2024-10-25 15:19:05,607 - RAG Loading - Created a chunk of size 1309, which is longer than the specified 1000
+2024-10-25 15:19:05,613 - RAG Loading - Created a chunk of size 3381, which is longer than the specified 1000
+2024-10-25 15:19:05,615 - RAG Loading - Created a chunk of size 1172, which is longer than the specified 1000
+2024-10-25 15:19:05,619 - RAG Loading - Created a chunk of size 1437, which is longer than the specified 1000
+2024-10-25 15:19:05,623 - RAG Loading - Created a chunk of size 2385, which is longer than the specified 1000
+2024-10-25 15:19:05,627 - RAG Loading - Created a chunk of size 1155, which is longer than the specified 1000
+2024-10-25 15:19:05,629 - RAG Loading - Created a chunk of size 1073, which is longer than the specified 1000
+2024-10-25 15:19:05,631 - RAG Loading - Created a chunk of size 1386, which is longer than the specified 1000
+2024-10-25 15:19:05,633 - RAG Loading - Created a chunk of size 1312, which is longer than the specified 1000
+2024-10-25 15:19:05,634 - RAG Loading - Created a chunk of size 1006, which is longer than the specified 1000
+2024-10-25 15:19:05,638 - RAG Loading - Created a chunk of size 1313, which is longer than the specified 1000
+2024-10-25 15:19:05,640 - RAG Loading - Created a chunk of size 3163, which is longer than the specified 1000
+2024-10-25 15:19:05,644 - RAG Loading - Created a chunk of size 3120, which is longer than the specified 1000
+2024-10-25 15:19:05,649 - RAG Loading - Created a chunk of size 1350, which is longer than the specified 1000
+2024-10-25 15:19:05,668 - RAG Loading - Created a chunk of size 3065, which is longer than the specified 1000
+2024-10-25 15:19:05,678 - RAG Loading - Created a chunk of size 3232, which is longer than the specified 1000
+2024-10-25 15:19:05,680 - RAG Loading - Created a chunk of size 1466, which is longer than the specified 1000
+2024-10-25 15:19:05,681 - RAG Loading - Created a chunk of size 1893, which is longer than the specified 1000
+2024-10-25 15:19:05,684 - RAG Loading - Created a chunk of size 1956, which is longer than the specified 1000
+2024-10-25 15:19:05,687 - RAG Loading - Created a chunk of size 1013, which is longer than the specified 1000
+2024-10-25 15:19:05,691 - RAG Loading - Created a chunk of size 1052, which is longer than the specified 1000
+2024-10-25 15:19:05,706 - RAG Loading - Created a chunk of size 1556, which is longer than the specified 1000
+2024-10-25 15:19:05,742 - RAG Loading - Created a chunk of size 1011, which is longer than the specified 1000
+2024-10-25 15:19:05,745 - RAG Loading - Created a chunk of size 1816, which is longer than the specified 1000
+2024-10-25 15:19:05,753 - RAG Loading - Created a chunk of size 1170, which is longer than the specified 1000
+2024-10-25 15:19:05,758 - RAG Loading - Created a chunk of size 1183, which is longer than the specified 1000
+2024-10-25 15:19:05,763 - RAG Loading - Created a chunk of size 1612, which is longer than the specified 1000
+2024-10-25 15:19:05,767 - RAG Loading - Created a chunk of size 1668, which is longer than the specified 1000
+2024-10-25 15:19:05,771 - RAG Loading - Created a chunk of size 1533, which is longer than the specified 1000
+2024-10-25 15:19:05,775 - RAG Loading - Created a chunk of size 1924, which is longer than the specified 1000
+2024-10-25 15:19:05,780 - RAG Loading - Created a chunk of size 1469, which is longer than the specified 1000
+2024-10-25 15:19:05,782 - RAG Loading - Created a chunk of size 2233, which is longer than the specified 1000
+2024-10-25 15:19:05,785 - RAG Loading - Created a chunk of size 1364, which is longer than the specified 1000
+2024-10-25 15:19:05,796 - RAG Loading - Created a chunk of size 1470, which is longer than the specified 1000
+2024-10-25 15:19:05,798 - RAG Loading - Created a chunk of size 1117, which is longer than the specified 1000
+2024-10-25 15:19:05,803 - RAG Loading - Total RAG loading completed in 234.92 seconds - Created 745 chunks from 304 documents
+2024-10-25 15:35:33,015 - RAG Loading - Loaded Lock-PatrickGeddesconservative-1977.pdf in 2.68 seconds
+2024-10-25 15:35:33,029 - RAG Loading - Loaded Pageants, fairs and foklore.md in 0.01 seconds
+2024-10-25 15:35:53,318 - RAG Loading - Loaded Cities in Evolution - chapter 18 - city betterment.pdf in 20.29 seconds
+2024-10-25 15:35:53,783 - RAG Loading - Loaded Exhibit A - weeks 4-8.pdf in 0.46 seconds
+2024-10-25 15:35:53,814 - RAG Loading - Loaded Civics as Applied Sociology.txt in 0.03 seconds
+2024-10-25 15:35:59,560 - RAG Loading - Loaded Pages from Biopolis - Chapter 2.pdf in 5.74 seconds
+2024-10-25 15:36:01,296 - RAG Loading - Loaded Patrick Geddes says....pdf in 1.73 seconds
+2024-10-25 15:36:08,677 - RAG Loading - Loaded Thinking_Machine.png in 7.37 seconds
+2024-10-25 15:36:08,689 - RAG Loading - Loaded Site Analysis Topics - Folk, Work, Place.md in 0.01 seconds
+2024-10-25 15:36:08,698 - RAG Loading - Loaded ethnographic-observation.md in 0.01 seconds
+2024-10-25 15:36:32,173 - RAG Loading - Loaded The Cultural-ecological Imagination of Patrick Geddes - Hopeful Futures.pdf in 23.47 seconds
+2024-10-25 15:36:41,422 - RAG Loading - Loaded Cities in Evolution - chapter 17 - spirit of cities.pdf in 9.25 seconds
+2024-10-25 15:36:44,767 - RAG Loading - Loaded Ursula K. Le Guin — 97. Utopiyin, Utopiyang.pdf in 3.34 seconds
+2024-10-25 15:36:59,164 - RAG Loading - Loaded Cities in Evolution - chapter 13 - education for town planning.pdf in 14.39 seconds
+2024-10-25 15:37:00,406 - RAG Loading - Loaded Exhibit A - weeks 1-3.pdf in 1.24 seconds
+2024-10-25 15:37:03,731 - RAG Loading - Loaded Exhibit A - LLMs as tools for thought.pdf in 3.32 seconds
+2024-10-25 15:37:38,781 - RAG Loading - Loaded Cities in Evolution - chapter 12- town planning and civic exhibitions.pdf in 35.05 seconds
+2024-10-25 15:37:43,481 - RAG Loading - Loaded L6 studio brief 2024 - Exhibit A.pdf in 4.70 seconds
+2024-10-25 15:37:46,819 - RAG Loading - Loaded Cities in Evolution - conclusion.pdf in 3.33 seconds
+2024-10-25 15:37:57,762 - RAG Loading - Loaded Cities in Evolution - chapter 15 - the survey of cities.pdf in 10.94 seconds
+2024-10-25 15:38:25,463 - RAG Loading - Loaded Cities in Evolution - chapter 1.pdf in 27.70 seconds
+2024-10-25 15:38:40,174 - RAG Loading - Loaded Cities in Evolution - chapter 16 - survey for town planning.pdf in 14.71 seconds
+2024-10-25 15:38:56,893 - RAG Loading - Loaded Cities in Evolution - chapter 14 - study of cities.pdf in 16.72 seconds
+2024-10-25 15:38:56,901 - RAG Loading - Loaded North Edgbaston Ward Fact Sheet.md in 0.00 seconds
+2024-10-25 15:38:56,902 - RAG Loading - Directory documents: processed 24 files in 206.56 seconds
+2024-10-25 15:38:56,917 - RAG Loading - Loaded 21-10-2024_conversation_history.md in 0.01 seconds
+2024-10-25 15:38:56,932 - RAG Loading - Loaded 24-10-2024_conversation_history.md in 0.01 seconds
+2024-10-25 15:38:56,946 - RAG Loading - Loaded 22-10-2024_conversation_history.md in 0.01 seconds
+2024-10-25 15:38:56,955 - RAG Loading - Loaded 17-10-2024_conversation_history.md in 0.01 seconds
+2024-10-25 15:38:56,963 - RAG Loading - Loaded 23-10-2024_conversation_history.md in 0.01 seconds
+2024-10-25 15:38:56,966 - RAG Loading - Directory history: processed 5 files in 0.06 seconds
+2024-10-25 15:38:56,982 - RAG Loading - Loaded Vic_Reeves.txt in 0.01 seconds
+2024-10-25 15:38:56,991 - RAG Loading - Loaded Rob_Annable.txt in 0.01 seconds
+2024-10-25 15:38:56,993 - RAG Loading - Loaded .ipynb_checkpoints in 0.00 seconds
+2024-10-25 15:38:56,995 - RAG Loading - Directory students: processed 3 files in 0.03 seconds
+2024-10-25 15:38:57,005 - RAG Loading - Created a chunk of size 1153, which is longer than the specified 1000
+2024-10-25 15:38:57,011 - RAG Loading - Created a chunk of size 2304, which is longer than the specified 1000
+2024-10-25 15:38:57,013 - RAG Loading - Created a chunk of size 3306, which is longer than the specified 1000
+2024-10-25 15:38:57,015 - RAG Loading - Created a chunk of size 2142, which is longer than the specified 1000
+2024-10-25 15:38:57,017 - RAG Loading - Created a chunk of size 2904, which is longer than the specified 1000
+2024-10-25 15:38:57,018 - RAG Loading - Created a chunk of size 1859, which is longer than the specified 1000
+2024-10-25 15:38:57,021 - RAG Loading - Created a chunk of size 2822, which is longer than the specified 1000
+2024-10-25 15:38:57,025 - RAG Loading - Created a chunk of size 1717, which is longer than the specified 1000
+2024-10-25 15:38:57,026 - RAG Loading - Created a chunk of size 1425, which is longer than the specified 1000
+2024-10-25 15:38:57,030 - RAG Loading - Created a chunk of size 1276, which is longer than the specified 1000
+2024-10-25 15:38:57,031 - RAG Loading - Created a chunk of size 1576, which is longer than the specified 1000
+2024-10-25 15:38:57,033 - RAG Loading - Created a chunk of size 3368, which is longer than the specified 1000
+2024-10-25 15:38:57,036 - RAG Loading - Created a chunk of size 1035, which is longer than the specified 1000
+2024-10-25 15:38:57,038 - RAG Loading - Created a chunk of size 1591, which is longer than the specified 1000
+2024-10-25 15:38:57,040 - RAG Loading - Created a chunk of size 1440, which is longer than the specified 1000
+2024-10-25 15:38:57,043 - RAG Loading - Created a chunk of size 1669, which is longer than the specified 1000
+2024-10-25 15:38:57,045 - RAG Loading - Created a chunk of size 4739, which is longer than the specified 1000
+2024-10-25 15:38:57,045 - RAG Loading - Created a chunk of size 1089, which is longer than the specified 1000
+2024-10-25 15:38:57,047 - RAG Loading - Created a chunk of size 2372, which is longer than the specified 1000
+2024-10-25 15:38:57,049 - RAG Loading - Created a chunk of size 2402, which is longer than the specified 1000
+2024-10-25 15:38:57,050 - RAG Loading - Created a chunk of size 4173, which is longer than the specified 1000
+2024-10-25 15:38:57,053 - RAG Loading - Created a chunk of size 1143, which is longer than the specified 1000
+2024-10-25 15:38:57,059 - RAG Loading - Created a chunk of size 1204, which is longer than the specified 1000
+2024-10-25 15:38:57,061 - RAG Loading - Created a chunk of size 1025, which is longer than the specified 1000
+2024-10-25 15:38:57,062 - RAG Loading - Created a chunk of size 1473, which is longer than the specified 1000
+2024-10-25 15:38:57,064 - RAG Loading - Created a chunk of size 2806, which is longer than the specified 1000
+2024-10-25 15:38:57,066 - RAG Loading - Created a chunk of size 3419, which is longer than the specified 1000
+2024-10-25 15:38:57,067 - RAG Loading - Created a chunk of size 1259, which is longer than the specified 1000
+2024-10-25 15:38:57,073 - RAG Loading - Created a chunk of size 2123, which is longer than the specified 1000
+2024-10-25 15:38:57,076 - RAG Loading - Created a chunk of size 1944, which is longer than the specified 1000
+2024-10-25 15:38:57,078 - RAG Loading - Created a chunk of size 1597, which is longer than the specified 1000
+2024-10-25 15:38:57,079 - RAG Loading - Created a chunk of size 1208, which is longer than the specified 1000
+2024-10-25 15:38:57,082 - RAG Loading - Created a chunk of size 1090, which is longer than the specified 1000
+2024-10-25 15:38:57,083 - RAG Loading - Created a chunk of size 1589, which is longer than the specified 1000
+2024-10-25 15:38:57,086 - RAG Loading - Created a chunk of size 3157, which is longer than the specified 1000
+2024-10-25 15:38:57,088 - RAG Loading - Created a chunk of size 1776, which is longer than the specified 1000
+2024-10-25 15:38:57,091 - RAG Loading - Created a chunk of size 1626, which is longer than the specified 1000
+2024-10-25 15:38:57,092 - RAG Loading - Created a chunk of size 1607, which is longer than the specified 1000
+2024-10-25 15:38:57,094 - RAG Loading - Created a chunk of size 4431, which is longer than the specified 1000
+2024-10-25 15:38:57,097 - RAG Loading - Created a chunk of size 1079, which is longer than the specified 1000
+2024-10-25 15:38:57,099 - RAG Loading - Created a chunk of size 1933, which is longer than the specified 1000
+2024-10-25 15:38:57,100 - RAG Loading - Created a chunk of size 1226, which is longer than the specified 1000
+2024-10-25 15:38:57,103 - RAG Loading - Created a chunk of size 1712, which is longer than the specified 1000
+2024-10-25 15:38:57,106 - RAG Loading - Created a chunk of size 2118, which is longer than the specified 1000
+2024-10-25 15:38:57,110 - RAG Loading - Created a chunk of size 2346, which is longer than the specified 1000
+2024-10-25 15:38:57,111 - RAG Loading - Created a chunk of size 1524, which is longer than the specified 1000
+2024-10-25 15:38:57,113 - RAG Loading - Created a chunk of size 1258, which is longer than the specified 1000
+2024-10-25 15:38:57,116 - RAG Loading - Created a chunk of size 1264, which is longer than the specified 1000
+2024-10-25 15:38:57,117 - RAG Loading - Created a chunk of size 2199, which is longer than the specified 1000
+2024-10-25 15:38:57,123 - RAG Loading - Created a chunk of size 1705, which is longer than the specified 1000
+2024-10-25 15:38:57,129 - RAG Loading - Created a chunk of size 1076, which is longer than the specified 1000
+2024-10-25 15:38:57,130 - RAG Loading - Created a chunk of size 1295, which is longer than the specified 1000
+2024-10-25 15:38:57,131 - RAG Loading - Created a chunk of size 1894, which is longer than the specified 1000
+2024-10-25 15:38:57,132 - RAG Loading - Created a chunk of size 1316, which is longer than the specified 1000
+2024-10-25 15:38:57,134 - RAG Loading - Created a chunk of size 3146, which is longer than the specified 1000
+2024-10-25 15:38:57,135 - RAG Loading - Created a chunk of size 1028, which is longer than the specified 1000
+2024-10-25 15:38:57,137 - RAG Loading - Created a chunk of size 1037, which is longer than the specified 1000
+2024-10-25 15:38:57,140 - RAG Loading - Created a chunk of size 1757, which is longer than the specified 1000
+2024-10-25 15:38:57,143 - RAG Loading - Created a chunk of size 1919, which is longer than the specified 1000
+2024-10-25 15:38:57,144 - RAG Loading - Created a chunk of size 1062, which is longer than the specified 1000
+2024-10-25 15:38:57,145 - RAG Loading - Created a chunk of size 1485, which is longer than the specified 1000
+2024-10-25 15:38:57,147 - RAG Loading - Created a chunk of size 1016, which is longer than the specified 1000
+2024-10-25 15:38:57,148 - RAG Loading - Created a chunk of size 1209, which is longer than the specified 1000
+2024-10-25 15:38:57,149 - RAG Loading - Created a chunk of size 1770, which is longer than the specified 1000
+2024-10-25 15:38:57,150 - RAG Loading - Created a chunk of size 1326, which is longer than the specified 1000
+2024-10-25 15:38:57,152 - RAG Loading - Created a chunk of size 3548, which is longer than the specified 1000
+2024-10-25 15:38:57,154 - RAG Loading - Created a chunk of size 1309, which is longer than the specified 1000
+2024-10-25 15:38:57,157 - RAG Loading - Created a chunk of size 3381, which is longer than the specified 1000
+2024-10-25 15:38:57,160 - RAG Loading - Created a chunk of size 1172, which is longer than the specified 1000
+2024-10-25 15:38:57,164 - RAG Loading - Created a chunk of size 1437, which is longer than the specified 1000
+2024-10-25 15:38:57,166 - RAG Loading - Created a chunk of size 2385, which is longer than the specified 1000
+2024-10-25 15:38:57,169 - RAG Loading - Created a chunk of size 1155, which is longer than the specified 1000
+2024-10-25 15:38:57,173 - RAG Loading - Created a chunk of size 1073, which is longer than the specified 1000
+2024-10-25 15:38:57,177 - RAG Loading - Created a chunk of size 1386, which is longer than the specified 1000
+2024-10-25 15:38:57,178 - RAG Loading - Created a chunk of size 1312, which is longer than the specified 1000
+2024-10-25 15:38:57,179 - RAG Loading - Created a chunk of size 1006, which is longer than the specified 1000
+2024-10-25 15:38:57,180 - RAG Loading - Created a chunk of size 1313, which is longer than the specified 1000
+2024-10-25 15:38:57,181 - RAG Loading - Created a chunk of size 3163, which is longer than the specified 1000
+2024-10-25 15:38:57,182 - RAG Loading - Created a chunk of size 3120, which is longer than the specified 1000
+2024-10-25 15:38:57,187 - RAG Loading - Created a chunk of size 1350, which is longer than the specified 1000
+2024-10-25 15:38:57,191 - RAG Loading - Created a chunk of size 3065, which is longer than the specified 1000
+2024-10-25 15:38:57,192 - RAG Loading - Created a chunk of size 3232, which is longer than the specified 1000
+2024-10-25 15:38:57,195 - RAG Loading - Created a chunk of size 1466, which is longer than the specified 1000
+2024-10-25 15:38:57,196 - RAG Loading - Created a chunk of size 1893, which is longer than the specified 1000
+2024-10-25 15:38:57,197 - RAG Loading - Created a chunk of size 1956, which is longer than the specified 1000
+2024-10-25 15:38:57,199 - RAG Loading - Created a chunk of size 1013, which is longer than the specified 1000
+2024-10-25 15:38:57,201 - RAG Loading - Created a chunk of size 1052, which is longer than the specified 1000
+2024-10-25 15:38:57,211 - RAG Loading - Created a chunk of size 1556, which is longer than the specified 1000
+2024-10-25 15:38:57,241 - RAG Loading - Created a chunk of size 1011, which is longer than the specified 1000
+2024-10-25 15:38:57,244 - RAG Loading - Created a chunk of size 1816, which is longer than the specified 1000
+2024-10-25 15:38:57,250 - RAG Loading - Created a chunk of size 1170, which is longer than the specified 1000
+2024-10-25 15:38:57,253 - RAG Loading - Created a chunk of size 1183, which is longer than the specified 1000
+2024-10-25 15:38:57,257 - RAG Loading - Created a chunk of size 1612, which is longer than the specified 1000
+2024-10-25 15:38:57,259 - RAG Loading - Created a chunk of size 1668, which is longer than the specified 1000
+2024-10-25 15:38:57,261 - RAG Loading - Created a chunk of size 1533, which is longer than the specified 1000
+2024-10-25 15:38:57,263 - RAG Loading - Created a chunk of size 1924, which is longer than the specified 1000
+2024-10-25 15:38:57,267 - RAG Loading - Created a chunk of size 1469, which is longer than the specified 1000
+2024-10-25 15:38:57,269 - RAG Loading - Created a chunk of size 2233, which is longer than the specified 1000
+2024-10-25 15:38:57,270 - RAG Loading - Created a chunk of size 1364, which is longer than the specified 1000
+2024-10-25 15:38:57,287 - RAG Loading - Created a chunk of size 1470, which is longer than the specified 1000
+2024-10-25 15:38:57,289 - RAG Loading - Created a chunk of size 1117, which is longer than the specified 1000
+2024-10-25 15:38:57,294 - RAG Loading - Total RAG loading completed in 206.96 seconds - Created 745 chunks from 304 documents
+2024-10-25 15:54:25,004 - RAG Loading - Successfully loaded today's history: 13127 characters
+2024-10-25 16:05:10,311 - RAG Loading - Loaded Lock-PatrickGeddesconservative-1977.pdf in 2.67 seconds
+2024-10-25 16:05:10,322 - RAG Loading - Loaded Pageants, fairs and foklore.md in 0.00 seconds
+2024-10-25 16:05:31,210 - RAG Loading - Loaded Cities in Evolution - chapter 18 - city betterment.pdf in 20.89 seconds
+2024-10-25 16:05:31,673 - RAG Loading - Loaded Exhibit A - weeks 4-8.pdf in 0.46 seconds
+2024-10-25 16:05:31,697 - RAG Loading - Loaded Civics as Applied Sociology.txt in 0.02 seconds
+2024-10-25 16:05:37,319 - RAG Loading - Loaded Pages from Biopolis - Chapter 2.pdf in 5.62 seconds
+2024-10-25 16:05:39,049 - RAG Loading - Loaded Patrick Geddes says....pdf in 1.73 seconds
+2024-10-25 16:05:45,403 - RAG Loading - Loaded Thinking_Machine.png in 6.35 seconds
+2024-10-25 16:05:45,411 - RAG Loading - Loaded Site Analysis Topics - Folk, Work, Place.md in 0.01 seconds
+2024-10-25 16:05:45,418 - RAG Loading - Loaded ethnographic-observation.md in 0.01 seconds
+2024-10-25 16:06:09,174 - RAG Loading - Loaded The Cultural-ecological Imagination of Patrick Geddes - Hopeful Futures.pdf in 23.75 seconds
+2024-10-25 16:06:18,647 - RAG Loading - Loaded Cities in Evolution - chapter 17 - spirit of cities.pdf in 9.47 seconds
+2024-10-25 16:06:22,111 - RAG Loading - Loaded Ursula K. Le Guin — 97. Utopiyin, Utopiyang.pdf in 3.46 seconds
+2024-10-25 16:06:35,406 - RAG Loading - Loaded Cities in Evolution - chapter 13 - education for town planning.pdf in 13.29 seconds
+2024-10-25 16:06:36,528 - RAG Loading - Loaded Exhibit A - weeks 1-3.pdf in 1.12 seconds
+2024-10-25 16:06:39,680 - RAG Loading - Loaded Exhibit A - LLMs as tools for thought.pdf in 3.15 seconds
+2024-10-25 16:07:15,170 - RAG Loading - Loaded Cities in Evolution - chapter 12- town planning and civic exhibitions.pdf in 35.49 seconds
+2024-10-25 16:07:20,150 - RAG Loading - Loaded L6 studio brief 2024 - Exhibit A.pdf in 4.97 seconds
+2024-10-25 16:07:23,274 - RAG Loading - Loaded Cities in Evolution - conclusion.pdf in 3.12 seconds
+2024-10-25 16:07:33,691 - RAG Loading - Loaded Cities in Evolution - chapter 15 - the survey of cities.pdf in 10.41 seconds
+2024-10-25 16:08:00,810 - RAG Loading - Loaded Cities in Evolution - chapter 1.pdf in 27.12 seconds
+2024-10-25 16:08:14,967 - RAG Loading - Loaded Cities in Evolution - chapter 16 - survey for town planning.pdf in 14.15 seconds
+2024-10-25 16:08:30,504 - RAG Loading - Loaded Cities in Evolution - chapter 14 - study of cities.pdf in 15.53 seconds
+2024-10-25 16:08:30,513 - RAG Loading - Loaded North Edgbaston Ward Fact Sheet.md in 0.00 seconds
+2024-10-25 16:08:30,516 - RAG Loading - Directory documents: processed 24 files in 202.88 seconds
+2024-10-25 16:08:30,537 - RAG Loading - Loaded 21-10-2024_conversation_history.md in 0.01 seconds
+2024-10-25 16:08:30,544 - RAG Loading - Loaded 24-10-2024_conversation_history.md in 0.01 seconds
+2024-10-25 16:08:30,553 - RAG Loading - Loaded 22-10-2024_conversation_history.md in 0.01 seconds
+2024-10-25 16:08:30,561 - RAG Loading - Loaded 17-10-2024_conversation_history.md in 0.01 seconds
+2024-10-25 16:08:30,573 - RAG Loading - Loaded 23-10-2024_conversation_history.md in 0.01 seconds
+2024-10-25 16:08:30,574 - RAG Loading - Directory history: processed 5 files in 0.05 seconds
+2024-10-25 16:08:30,581 - RAG Loading - Loaded Vic_Reeves.txt in 0.00 seconds
+2024-10-25 16:08:30,588 - RAG Loading - Loaded Rob_Annable.txt in 0.00 seconds
+2024-10-25 16:08:30,589 - RAG Loading - Loaded .ipynb_checkpoints in 0.00 seconds
+2024-10-25 16:08:30,590 - RAG Loading - Directory students: processed 3 files in 0.01 seconds
+2024-10-25 16:08:30,605 - RAG Loading - Created a chunk of size 1153, which is longer than the specified 1000
+2024-10-25 16:08:30,606 - RAG Loading - Created a chunk of size 2304, which is longer than the specified 1000
+2024-10-25 16:08:30,608 - RAG Loading - Created a chunk of size 3306, which is longer than the specified 1000
+2024-10-25 16:08:30,610 - RAG Loading - Created a chunk of size 2142, which is longer than the specified 1000
+2024-10-25 16:08:30,611 - RAG Loading - Created a chunk of size 2904, which is longer than the specified 1000
+2024-10-25 16:08:30,612 - RAG Loading - Created a chunk of size 1859, which is longer than the specified 1000
+2024-10-25 16:08:30,613 - RAG Loading - Created a chunk of size 2822, which is longer than the specified 1000
+2024-10-25 16:08:30,615 - RAG Loading - Created a chunk of size 1717, which is longer than the specified 1000
+2024-10-25 16:08:30,619 - RAG Loading - Created a chunk of size 1425, which is longer than the specified 1000
+2024-10-25 16:08:30,622 - RAG Loading - Created a chunk of size 1276, which is longer than the specified 1000
+2024-10-25 16:08:30,624 - RAG Loading - Created a chunk of size 1576, which is longer than the specified 1000
+2024-10-25 16:08:30,627 - RAG Loading - Created a chunk of size 3368, which is longer than the specified 1000
+2024-10-25 16:08:30,629 - RAG Loading - Created a chunk of size 1035, which is longer than the specified 1000
+2024-10-25 16:08:30,631 - RAG Loading - Created a chunk of size 1591, which is longer than the specified 1000
+2024-10-25 16:08:30,633 - RAG Loading - Created a chunk of size 1440, which is longer than the specified 1000
+2024-10-25 16:08:30,637 - RAG Loading - Created a chunk of size 1669, which is longer than the specified 1000
+2024-10-25 16:08:30,639 - RAG Loading - Created a chunk of size 4739, which is longer than the specified 1000
+2024-10-25 16:08:30,639 - RAG Loading - Created a chunk of size 1089, which is longer than the specified 1000
+2024-10-25 16:08:30,640 - RAG Loading - Created a chunk of size 2372, which is longer than the specified 1000
+2024-10-25 16:08:30,642 - RAG Loading - Created a chunk of size 2402, which is longer than the specified 1000
+2024-10-25 16:08:30,644 - RAG Loading - Created a chunk of size 4173, which is longer than the specified 1000
+2024-10-25 16:08:30,646 - RAG Loading - Created a chunk of size 1143, which is longer than the specified 1000
+2024-10-25 16:08:30,646 - RAG Loading - Created a chunk of size 1204, which is longer than the specified 1000
+2024-10-25 16:08:30,649 - RAG Loading - Created a chunk of size 1025, which is longer than the specified 1000
+2024-10-25 16:08:30,650 - RAG Loading - Created a chunk of size 1473, which is longer than the specified 1000
+2024-10-25 16:08:30,655 - RAG Loading - Created a chunk of size 2806, which is longer than the specified 1000
+2024-10-25 16:08:30,656 - RAG Loading - Created a chunk of size 3419, which is longer than the specified 1000
+2024-10-25 16:08:30,657 - RAG Loading - Created a chunk of size 1259, which is longer than the specified 1000
+2024-10-25 16:08:30,659 - RAG Loading - Created a chunk of size 2123, which is longer than the specified 1000
+2024-10-25 16:08:30,660 - RAG Loading - Created a chunk of size 1944, which is longer than the specified 1000
+2024-10-25 16:08:30,662 - RAG Loading - Created a chunk of size 1597, which is longer than the specified 1000
+2024-10-25 16:08:30,664 - RAG Loading - Created a chunk of size 1208, which is longer than the specified 1000
+2024-10-25 16:08:30,666 - RAG Loading - Created a chunk of size 1090, which is longer than the specified 1000
+2024-10-25 16:08:30,668 - RAG Loading - Created a chunk of size 1589, which is longer than the specified 1000
+2024-10-25 16:08:30,671 - RAG Loading - Created a chunk of size 3157, which is longer than the specified 1000
+2024-10-25 16:08:30,672 - RAG Loading - Created a chunk of size 1776, which is longer than the specified 1000
+2024-10-25 16:08:30,675 - RAG Loading - Created a chunk of size 1626, which is longer than the specified 1000
+2024-10-25 16:08:30,676 - RAG Loading - Created a chunk of size 1607, which is longer than the specified 1000
+2024-10-25 16:08:30,678 - RAG Loading - Created a chunk of size 4431, which is longer than the specified 1000
+2024-10-25 16:08:30,679 - RAG Loading - Created a chunk of size 1079, which is longer than the specified 1000
+2024-10-25 16:08:30,683 - RAG Loading - Created a chunk of size 1933, which is longer than the specified 1000
+2024-10-25 16:08:30,689 - RAG Loading - Created a chunk of size 1226, which is longer than the specified 1000
+2024-10-25 16:08:30,690 - RAG Loading - Created a chunk of size 1712, which is longer than the specified 1000
+2024-10-25 16:08:30,690 - RAG Loading - Created a chunk of size 2118, which is longer than the specified 1000
+2024-10-25 16:08:30,692 - RAG Loading - Created a chunk of size 2346, which is longer than the specified 1000
+2024-10-25 16:08:30,694 - RAG Loading - Created a chunk of size 1524, which is longer than the specified 1000
+2024-10-25 16:08:30,695 - RAG Loading - Created a chunk of size 1258, which is longer than the specified 1000
+2024-10-25 16:08:30,696 - RAG Loading - Created a chunk of size 1264, which is longer than the specified 1000
+2024-10-25 16:08:30,699 - RAG Loading - Created a chunk of size 2199, which is longer than the specified 1000
+2024-10-25 16:08:30,701 - RAG Loading - Created a chunk of size 1705, which is longer than the specified 1000
+2024-10-25 16:08:30,702 - RAG Loading - Created a chunk of size 1076, which is longer than the specified 1000
+2024-10-25 16:08:30,705 - RAG Loading - Created a chunk of size 1295, which is longer than the specified 1000
+2024-10-25 16:08:30,706 - RAG Loading - Created a chunk of size 1894, which is longer than the specified 1000
+2024-10-25 16:08:30,707 - RAG Loading - Created a chunk of size 1316, which is longer than the specified 1000
+2024-10-25 16:08:30,710 - RAG Loading - Created a chunk of size 3146, which is longer than the specified 1000
+2024-10-25 16:08:30,712 - RAG Loading - Created a chunk of size 1028, which is longer than the specified 1000
+2024-10-25 16:08:30,713 - RAG Loading - Created a chunk of size 1037, which is longer than the specified 1000
+2024-10-25 16:08:30,718 - RAG Loading - Created a chunk of size 1757, which is longer than the specified 1000
+2024-10-25 16:08:30,720 - RAG Loading - Created a chunk of size 1919, which is longer than the specified 1000
+2024-10-25 16:08:30,722 - RAG Loading - Created a chunk of size 1062, which is longer than the specified 1000
+2024-10-25 16:08:30,724 - RAG Loading - Created a chunk of size 1485, which is longer than the specified 1000
+2024-10-25 16:08:30,726 - RAG Loading - Created a chunk of size 1016, which is longer than the specified 1000
+2024-10-25 16:08:30,729 - RAG Loading - Created a chunk of size 1209, which is longer than the specified 1000
+2024-10-25 16:08:30,733 - RAG Loading - Created a chunk of size 1770, which is longer than the specified 1000
+2024-10-25 16:08:30,736 - RAG Loading - Created a chunk of size 1326, which is longer than the specified 1000
+2024-10-25 16:08:30,738 - RAG Loading - Created a chunk of size 3548, which is longer than the specified 1000
+2024-10-25 16:08:30,739 - RAG Loading - Created a chunk of size 1309, which is longer than the specified 1000
+2024-10-25 16:08:30,741 - RAG Loading - Created a chunk of size 3381, which is longer than the specified 1000
+2024-10-25 16:08:30,742 - RAG Loading - Created a chunk of size 1172, which is longer than the specified 1000
+2024-10-25 16:08:30,743 - RAG Loading - Created a chunk of size 1437, which is longer than the specified 1000
+2024-10-25 16:08:30,745 - RAG Loading - Created a chunk of size 2385, which is longer than the specified 1000
+2024-10-25 16:08:30,745 - RAG Loading - Created a chunk of size 1155, which is longer than the specified 1000
+2024-10-25 16:08:30,748 - RAG Loading - Created a chunk of size 1073, which is longer than the specified 1000
+2024-10-25 16:08:30,753 - RAG Loading - Created a chunk of size 1386, which is longer than the specified 1000
+2024-10-25 16:08:30,755 - RAG Loading - Created a chunk of size 1312, which is longer than the specified 1000
+2024-10-25 16:08:30,756 - RAG Loading - Created a chunk of size 1006, which is longer than the specified 1000
+2024-10-25 16:08:30,757 - RAG Loading - Created a chunk of size 1313, which is longer than the specified 1000
+2024-10-25 16:08:30,757 - RAG Loading - Created a chunk of size 3163, which is longer than the specified 1000
+2024-10-25 16:08:30,758 - RAG Loading - Created a chunk of size 3120, which is longer than the specified 1000
+2024-10-25 16:08:30,758 - RAG Loading - Created a chunk of size 1350, which is longer than the specified 1000
+2024-10-25 16:08:30,759 - RAG Loading - Created a chunk of size 3065, which is longer than the specified 1000
+2024-10-25 16:08:30,760 - RAG Loading - Created a chunk of size 3232, which is longer than the specified 1000
+2024-10-25 16:08:30,760 - RAG Loading - Created a chunk of size 1466, which is longer than the specified 1000
+2024-10-25 16:08:30,760 - RAG Loading - Created a chunk of size 1893, which is longer than the specified 1000
+2024-10-25 16:08:30,762 - RAG Loading - Created a chunk of size 1956, which is longer than the specified 1000
+2024-10-25 16:08:30,766 - RAG Loading - Created a chunk of size 1013, which is longer than the specified 1000
+2024-10-25 16:08:30,769 - RAG Loading - Created a chunk of size 1052, which is longer than the specified 1000
+2024-10-25 16:08:30,776 - RAG Loading - Created a chunk of size 1556, which is longer than the specified 1000
+2024-10-25 16:08:30,811 - RAG Loading - Created a chunk of size 1011, which is longer than the specified 1000
+2024-10-25 16:08:30,815 - RAG Loading - Created a chunk of size 1816, which is longer than the specified 1000
+2024-10-25 16:08:30,820 - RAG Loading - Created a chunk of size 1170, which is longer than the specified 1000
+2024-10-25 16:08:30,824 - RAG Loading - Created a chunk of size 1183, which is longer than the specified 1000
+2024-10-25 16:08:30,827 - RAG Loading - Created a chunk of size 1612, which is longer than the specified 1000
+2024-10-25 16:08:30,829 - RAG Loading - Created a chunk of size 1668, which is longer than the specified 1000
+2024-10-25 16:08:30,832 - RAG Loading - Created a chunk of size 1533, which is longer than the specified 1000
+2024-10-25 16:08:30,838 - RAG Loading - Created a chunk of size 1924, which is longer than the specified 1000
+2024-10-25 16:08:30,844 - RAG Loading - Created a chunk of size 1469, which is longer than the specified 1000
+2024-10-25 16:08:30,847 - RAG Loading - Created a chunk of size 2233, which is longer than the specified 1000
+2024-10-25 16:08:30,851 - RAG Loading - Created a chunk of size 1364, which is longer than the specified 1000
+2024-10-25 16:08:30,862 - RAG Loading - Created a chunk of size 1470, which is longer than the specified 1000
+2024-10-25 16:08:30,872 - RAG Loading - Created a chunk of size 1117, which is longer than the specified 1000
+2024-10-25 16:08:30,877 - RAG Loading - Total RAG loading completed in 203.24 seconds - Created 745 chunks from 304 documents
+2024-10-25 19:03:56,366 - RAG Loading - Loaded Ursula K. Le Guin — 97. Utopiyin, Utopiyang.pdf in 0.23 seconds
+2024-10-25 19:03:58,674 - RAG Loading - Loaded Cities in Evolution - chapter 1.pdf in 2.31 seconds
+2024-10-25 19:03:58,893 - RAG Loading - Loaded Cities in Evolution - conclusion.pdf in 0.22 seconds
+2024-10-25 19:03:58,895 - RAG Loading - Loaded Civics as Applied Sociology.txt in 0.00 seconds
+2024-10-25 19:04:01,597 - RAG Loading - Loaded Cities in Evolution - chapter 12- town planning and civic exhibitions.pdf in 2.70 seconds
+2024-10-25 19:04:02,593 - RAG Loading - Loaded Cities in Evolution - chapter 13 - education for town planning.pdf in 1.00 seconds
+2024-10-25 19:04:03,886 - RAG Loading - Loaded Cities in Evolution - chapter 14 - study of cities.pdf in 1.29 seconds
+2024-10-25 19:04:04,706 - RAG Loading - Loaded Cities in Evolution - chapter 15 - the survey of cities.pdf in 0.82 seconds
+2024-10-25 19:04:05,881 - RAG Loading - Loaded Cities in Evolution - chapter 16 - survey for town planning.pdf in 1.17 seconds
+2024-10-25 19:04:06,543 - RAG Loading - Loaded Cities in Evolution - chapter 17 - spirit of cities.pdf in 0.66 seconds
+2024-10-25 19:04:08,186 - RAG Loading - Loaded Cities in Evolution - chapter 18 - city betterment.pdf in 1.64 seconds
+2024-10-25 19:04:08,390 - RAG Loading - Loaded Exhibit A - LLMs as tools for thought.pdf in 0.20 seconds
+2024-10-25 19:04:08,461 - RAG Loading - Loaded Exhibit A - weeks 1-3.pdf in 0.07 seconds
+2024-10-25 19:04:08,495 - RAG Loading - Loaded Exhibit A - weeks 4-8.pdf in 0.03 seconds
+2024-10-25 19:04:08,772 - RAG Loading - Loaded L6 studio brief 2024 - Exhibit A.pdf in 0.28 seconds
+2024-10-25 19:04:09,023 - RAG Loading - Loaded Lock-PatrickGeddesconservative-1977.pdf in 0.25 seconds
+2024-10-25 19:04:09,023 - RAG Loading - Loaded North Edgbaston Ward Fact Sheet.md in 0.00 seconds
+2024-10-25 19:04:09,024 - RAG Loading - Loaded Pageants, fairs and foklore.md in 0.00 seconds
+2024-10-25 19:04:09,357 - RAG Loading - Loaded Pages from Biopolis - Chapter 2.pdf in 0.33 seconds
+2024-10-25 19:04:09,486 - RAG Loading - Loaded Patrick Geddes says....pdf in 0.13 seconds
+2024-10-25 19:04:09,487 - RAG Loading - Loaded Site Analysis Topics - Folk, Work, Place.md in 0.00 seconds
+2024-10-25 19:04:10,105 - RAG Loading - Loaded Thinking_Machine.png in 0.62 seconds
+2024-10-25 19:04:11,661 - RAG Loading - Loaded The Cultural-ecological Imagination of Patrick Geddes - Hopeful Futures.pdf in 1.56 seconds
+2024-10-25 19:04:11,661 - RAG Loading - Loaded ethnographic-observation.md in 0.00 seconds
+2024-10-25 19:04:11,662 - RAG Loading - Directory documents: processed 24 files in 15.53 seconds
+2024-10-25 19:04:11,663 - RAG Loading - Loaded 17-10-2024_conversation_history.md in 0.00 seconds
+2024-10-25 19:04:11,663 - RAG Loading - Loaded 21-10-2024_conversation_history.md in 0.00 seconds
+2024-10-25 19:04:11,664 - RAG Loading - Loaded 22-10-2024_conversation_history.md in 0.00 seconds
+2024-10-25 19:04:11,665 - RAG Loading - Loaded 23-10-2024_conversation_history.md in 0.00 seconds
+2024-10-25 19:04:11,665 - RAG Loading - Loaded 24-10-2024_conversation_history.md in 0.00 seconds
+2024-10-25 19:04:11,665 - RAG Loading - Directory history: processed 5 files in 0.00 seconds
+2024-10-25 19:04:11,666 - RAG Loading - Loaded Rob Annable.txt in 0.00 seconds
+2024-10-25 19:04:11,667 - RAG Loading - Loaded Rob_Annable.txt in 0.00 seconds
+2024-10-25 19:04:11,668 - RAG Loading - Loaded Vic_Reeves.txt in 0.00 seconds
+2024-10-25 19:04:11,668 - RAG Loading - Directory students: processed 3 files in 0.00 seconds
+2024-10-25 19:04:11,669 - RAG Loading - Created a chunk of size 1153, which is longer than the specified 1000
+2024-10-25 19:04:11,669 - RAG Loading - Created a chunk of size 2304, which is longer than the specified 1000
+2024-10-25 19:04:11,669 - RAG Loading - Created a chunk of size 3306, which is longer than the specified 1000
+2024-10-25 19:04:11,669 - RAG Loading - Created a chunk of size 2142, which is longer than the specified 1000
+2024-10-25 19:04:11,669 - RAG Loading - Created a chunk of size 2904, which is longer than the specified 1000
+2024-10-25 19:04:11,669 - RAG Loading - Created a chunk of size 1859, which is longer than the specified 1000
+2024-10-25 19:04:11,669 - RAG Loading - Created a chunk of size 2822, which is longer than the specified 1000
+2024-10-25 19:04:11,670 - RAG Loading - Created a chunk of size 1717, which is longer than the specified 1000
+2024-10-25 19:04:11,670 - RAG Loading - Created a chunk of size 1425, which is longer than the specified 1000
+2024-10-25 19:04:11,670 - RAG Loading - Created a chunk of size 1276, which is longer than the specified 1000
+2024-10-25 19:04:11,670 - RAG Loading - Created a chunk of size 1576, which is longer than the specified 1000
+2024-10-25 19:04:11,670 - RAG Loading - Created a chunk of size 3368, which is longer than the specified 1000
+2024-10-25 19:04:11,670 - RAG Loading - Created a chunk of size 1035, which is longer than the specified 1000
+2024-10-25 19:04:11,670 - RAG Loading - Created a chunk of size 1591, which is longer than the specified 1000
+2024-10-25 19:04:11,670 - RAG Loading - Created a chunk of size 1440, which is longer than the specified 1000
+2024-10-25 19:04:11,670 - RAG Loading - Created a chunk of size 1669, which is longer than the specified 1000
+2024-10-25 19:04:11,671 - RAG Loading - Created a chunk of size 4739, which is longer than the specified 1000
+2024-10-25 19:04:11,671 - RAG Loading - Created a chunk of size 1089, which is longer than the specified 1000
+2024-10-25 19:04:11,671 - RAG Loading - Created a chunk of size 2372, which is longer than the specified 1000
+2024-10-25 19:04:11,671 - RAG Loading - Created a chunk of size 2402, which is longer than the specified 1000
+2024-10-25 19:04:11,671 - RAG Loading - Created a chunk of size 4173, which is longer than the specified 1000
+2024-10-25 19:04:11,672 - RAG Loading - Created a chunk of size 1143, which is longer than the specified 1000
+2024-10-25 19:04:11,672 - RAG Loading - Created a chunk of size 1204, which is longer than the specified 1000
+2024-10-25 19:04:11,672 - RAG Loading - Created a chunk of size 1025, which is longer than the specified 1000
+2024-10-25 19:04:11,672 - RAG Loading - Created a chunk of size 1473, which is longer than the specified 1000
+2024-10-25 19:04:11,672 - RAG Loading - Created a chunk of size 2806, which is longer than the specified 1000
+2024-10-25 19:04:11,673 - RAG Loading - Created a chunk of size 3419, which is longer than the specified 1000
+2024-10-25 19:04:11,673 - RAG Loading - Created a chunk of size 1259, which is longer than the specified 1000
+2024-10-25 19:04:11,673 - RAG Loading - Created a chunk of size 2123, which is longer than the specified 1000
+2024-10-25 19:04:11,673 - RAG Loading - Created a chunk of size 1944, which is longer than the specified 1000
+2024-10-25 19:04:11,673 - RAG Loading - Created a chunk of size 1597, which is longer than the specified 1000
+2024-10-25 19:04:11,673 - RAG Loading - Created a chunk of size 1208, which is longer than the specified 1000
+2024-10-25 19:04:11,673 - RAG Loading - Created a chunk of size 1090, which is longer than the specified 1000
+2024-10-25 19:04:11,674 - RAG Loading - Created a chunk of size 1589, which is longer than the specified 1000
+2024-10-25 19:04:11,674 - RAG Loading - Created a chunk of size 3157, which is longer than the specified 1000
+2024-10-25 19:04:11,674 - RAG Loading - Created a chunk of size 1776, which is longer than the specified 1000
+2024-10-25 19:04:11,674 - RAG Loading - Created a chunk of size 1626, which is longer than the specified 1000
+2024-10-25 19:04:11,674 - RAG Loading - Created a chunk of size 1607, which is longer than the specified 1000
+2024-10-25 19:04:11,674 - RAG Loading - Created a chunk of size 4431, which is longer than the specified 1000
+2024-10-25 19:04:11,674 - RAG Loading - Created a chunk of size 1079, which is longer than the specified 1000
+2024-10-25 19:04:11,674 - RAG Loading - Created a chunk of size 1933, which is longer than the specified 1000
+2024-10-25 19:04:11,675 - RAG Loading - Created a chunk of size 1226, which is longer than the specified 1000
+2024-10-25 19:04:11,675 - RAG Loading - Created a chunk of size 1712, which is longer than the specified 1000
+2024-10-25 19:04:11,675 - RAG Loading - Created a chunk of size 2118, which is longer than the specified 1000
+2024-10-25 19:04:11,675 - RAG Loading - Created a chunk of size 2346, which is longer than the specified 1000
+2024-10-25 19:04:11,675 - RAG Loading - Created a chunk of size 1524, which is longer than the specified 1000
+2024-10-25 19:04:11,676 - RAG Loading - Created a chunk of size 1258, which is longer than the specified 1000
+2024-10-25 19:04:11,676 - RAG Loading - Created a chunk of size 1264, which is longer than the specified 1000
+2024-10-25 19:04:11,676 - RAG Loading - Created a chunk of size 2199, which is longer than the specified 1000
+2024-10-25 19:04:11,676 - RAG Loading - Created a chunk of size 1705, which is longer than the specified 1000
+2024-10-25 19:04:11,676 - RAG Loading - Created a chunk of size 1076, which is longer than the specified 1000
+2024-10-25 19:04:11,676 - RAG Loading - Created a chunk of size 1295, which is longer than the specified 1000
+2024-10-25 19:04:11,677 - RAG Loading - Created a chunk of size 1894, which is longer than the specified 1000
+2024-10-25 19:04:11,677 - RAG Loading - Created a chunk of size 1316, which is longer than the specified 1000
+2024-10-25 19:04:11,677 - RAG Loading - Created a chunk of size 3146, which is longer than the specified 1000
+2024-10-25 19:04:11,677 - RAG Loading - Created a chunk of size 1028, which is longer than the specified 1000
+2024-10-25 19:04:11,677 - RAG Loading - Created a chunk of size 1037, which is longer than the specified 1000
+2024-10-25 19:04:11,677 - RAG Loading - Created a chunk of size 1757, which is longer than the specified 1000
+2024-10-25 19:04:11,677 - RAG Loading - Created a chunk of size 1919, which is longer than the specified 1000
+2024-10-25 19:04:11,678 - RAG Loading - Created a chunk of size 1062, which is longer than the specified 1000
+2024-10-25 19:04:11,678 - RAG Loading - Created a chunk of size 1485, which is longer than the specified 1000
+2024-10-25 19:04:11,678 - RAG Loading - Created a chunk of size 1016, which is longer than the specified 1000
+2024-10-25 19:04:11,678 - RAG Loading - Created a chunk of size 1209, which is longer than the specified 1000
+2024-10-25 19:04:11,678 - RAG Loading - Created a chunk of size 1770, which is longer than the specified 1000
+2024-10-25 19:04:11,678 - RAG Loading - Created a chunk of size 1326, which is longer than the specified 1000
+2024-10-25 19:04:11,678 - RAG Loading - Created a chunk of size 3548, which is longer than the specified 1000
+2024-10-25 19:04:11,678 - RAG Loading - Created a chunk of size 1309, which is longer than the specified 1000
+2024-10-25 19:04:11,679 - RAG Loading - Created a chunk of size 3381, which is longer than the specified 1000
+2024-10-25 19:04:11,679 - RAG Loading - Created a chunk of size 1172, which is longer than the specified 1000
+2024-10-25 19:04:11,679 - RAG Loading - Created a chunk of size 1437, which is longer than the specified 1000
+2024-10-25 19:04:11,679 - RAG Loading - Created a chunk of size 2385, which is longer than the specified 1000
+2024-10-25 19:04:11,679 - RAG Loading - Created a chunk of size 1155, which is longer than the specified 1000
+2024-10-25 19:04:11,679 - RAG Loading - Created a chunk of size 1073, which is longer than the specified 1000
+2024-10-25 19:04:11,679 - RAG Loading - Created a chunk of size 1386, which is longer than the specified 1000
+2024-10-25 19:04:11,679 - RAG Loading - Created a chunk of size 1312, which is longer than the specified 1000
+2024-10-25 19:04:11,679 - RAG Loading - Created a chunk of size 1006, which is longer than the specified 1000
+2024-10-25 19:04:11,680 - RAG Loading - Created a chunk of size 1313, which is longer than the specified 1000
+2024-10-25 19:04:11,680 - RAG Loading - Created a chunk of size 3163, which is longer than the specified 1000
+2024-10-25 19:04:11,680 - RAG Loading - Created a chunk of size 3120, which is longer than the specified 1000
+2024-10-25 19:04:11,680 - RAG Loading - Created a chunk of size 1350, which is longer than the specified 1000
+2024-10-25 19:04:11,680 - RAG Loading - Created a chunk of size 3065, which is longer than the specified 1000
+2024-10-25 19:04:11,680 - RAG Loading - Created a chunk of size 3232, which is longer than the specified 1000
+2024-10-25 19:04:11,680 - RAG Loading - Created a chunk of size 1466, which is longer than the specified 1000
+2024-10-25 19:04:11,681 - RAG Loading - Created a chunk of size 1893, which is longer than the specified 1000
+2024-10-25 19:04:11,681 - RAG Loading - Created a chunk of size 1956, which is longer than the specified 1000
+2024-10-25 19:04:11,681 - RAG Loading - Created a chunk of size 1013, which is longer than the specified 1000
+2024-10-25 19:04:11,681 - RAG Loading - Created a chunk of size 1052, which is longer than the specified 1000
+2024-10-25 19:04:11,682 - RAG Loading - Created a chunk of size 1011, which is longer than the specified 1000
+2024-10-25 19:04:11,683 - RAG Loading - Created a chunk of size 1556, which is longer than the specified 1000
+2024-10-25 19:04:11,683 - RAG Loading - Created a chunk of size 1816, which is longer than the specified 1000
+2024-10-25 19:04:11,684 - RAG Loading - Created a chunk of size 1170, which is longer than the specified 1000
+2024-10-25 19:04:11,684 - RAG Loading - Created a chunk of size 1183, which is longer than the specified 1000
+2024-10-25 19:04:11,684 - RAG Loading - Created a chunk of size 1924, which is longer than the specified 1000
+2024-10-25 19:04:11,684 - RAG Loading - Created a chunk of size 1469, which is longer than the specified 1000
+2024-10-25 19:04:11,684 - RAG Loading - Created a chunk of size 2233, which is longer than the specified 1000
+2024-10-25 19:04:11,684 - RAG Loading - Created a chunk of size 1364, which is longer than the specified 1000
+2024-10-25 19:04:11,684 - RAG Loading - Created a chunk of size 1470, which is longer than the specified 1000
+2024-10-25 19:04:11,685 - RAG Loading - Created a chunk of size 1117, which is longer than the specified 1000
+2024-10-25 19:04:11,685 - RAG Loading - Created a chunk of size 1612, which is longer than the specified 1000
+2024-10-25 19:04:11,685 - RAG Loading - Created a chunk of size 1668, which is longer than the specified 1000
+2024-10-25 19:04:11,685 - RAG Loading - Created a chunk of size 1533, which is longer than the specified 1000
+2024-10-25 19:04:11,685 - RAG Loading - Total RAG loading completed in 15.55 seconds - Created 746 chunks from 305 documents
