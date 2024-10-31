@@ -2,13 +2,16 @@
 
 import streamlit as st
 import pandas as pd
-import plotly.express as px
-import plotly.graph_objects as go
+import altair as alt
 from datetime import datetime, timedelta
 import json
 import os
+import csv  # Add this import
 import numpy as np
 from collections import defaultdict
+
+# Force pandas to use the python engine and disable pyarrow
+pd.options.io.engine = "python"
 
 def check_password():
     """Returns `True` if the user had the correct password."""
@@ -32,7 +35,7 @@ def check_password():
         return True
 
 def load_response_data(logs_dir):
-    """Load and process all response logs with flexible date handling and improved error handling"""
+    """Load and process all response logs with flexible date handling and proper CSV reading"""
     all_data = []
     
     for filename in os.listdir(logs_dir):
@@ -47,7 +50,7 @@ def load_response_data(logs_dir):
                 encoding='utf-8',
                 quoting=csv.QUOTE_ALL,     # Quote all fields
                 escapechar='\\',           # Use backslash as escape character
-                on_bad_lines='warn'        # Warn about problematic lines instead of failing
+                on_bad_lines='warn'        # Warn about problematic lines
             )
             
             # Flexible date parsing with multiple formats
