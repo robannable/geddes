@@ -1,9 +1,0 @@
-Project Title: Street Support Hub
-Description: Centres for mutual aid
-Key Themes:
-- COVID resilience
-- Home delivery
-- New Green Power supply
-Research Questions:
-1. How can mutual aid be delivered in a network?
-2. What green technology can be used to leverage policies that support creation of community spaces

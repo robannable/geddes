@@ -4,6 +4,12 @@ import json
 import pygame
 import os
 import csv
+import streamlit as st
+import requests
+import json
+import pygame
+import os
+import csv
 from datetime import datetime
 from pypdf import PdfReader
 from langchain.text_splitter import CharacterTextSplitter
@@ -13,14 +19,42 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 import numpy as np
 import html
-
-
 from urllib3.util.retry import Retry
 from requests.adapters import HTTPAdapter
 import requests
 from requests.exceptions import RequestException
 
+# First, define the script directory
+script_dir = os.path.dirname(os.path.abspath(__file__))
 
+import logging
+import time
+
+# Set up minimal logging for document loading only
+log_dir = os.path.join(script_dir, "debug_logs")
+os.makedirs(log_dir, exist_ok=True)
+current_date = datetime.now().strftime("%d-%m-%Y")
+log_file = os.path.join(log_dir, f"{current_date}_rag_loading.log")
+
+logging.basicConfig(
+    filename=log_file,
+    level=logging.INFO,
+    format='%(asctime)s - RAG Loading - %(message)s',
+    encoding='utf-8'
+)
+
+# Initialize directories
+sound_dir = os.path.join(script_dir, 'sounds')
+prompts_dir = os.path.join(script_dir, 'prompts')
+about_file_path = os.path.join(script_dir, 'about.txt')
+
+# Initialize pygame for audio
+pygame.mixer.init()
+
+# Load sound file
+ding_sound = pygame.mixer.Sound(os.path.join(sound_dir, 'ding2.wav'))
+
+# Set up API
 class PerplexityAPIHandler:
     def __init__(self, api_key, max_retries=3, timeout=30):
         self.api_key = api_key
@@ -80,18 +114,6 @@ class PerplexityAPIHandler:
                     raise
 
 
-# Initialize pygame for audio
-pygame.mixer.init()
-
-# Get the directory of the current script
-script_dir = os.path.dirname(os.path.abspath(__file__))
-sound_dir = os.path.join(script_dir, 'sounds')
-prompts_dir = os.path.join(script_dir, 'prompts')
-about_file_path = os.path.join(script_dir, 'about.txt')
-
-# Load sound file
-ding_sound = pygame.mixer.Sound(os.path.join(sound_dir, 'ding.wav'))
-
 # Streamlit secrets API location
 PERPLEXITY_API_KEY = st.secrets["PERPLEXITY_API_KEY"]
 
@@ -127,7 +149,7 @@ def get_patrick_prompt():
         return prompt
     except FileNotFoundError:
         st.warning(f"'{prompt_file_path}' not found. Using default prompt.")
-        return "You are Patrick Geddes, a Scottish biologist, sociologist, and town planner... [rest of default prompt] ... When responding to users, consider their name and potential gender implications. Avoid making assumptions based on stereotypes and strive for inclusive language. Adapt your language and examples to be appropriate for all users, regardless of their perceived gender."
+        return "You are Patrick Geddes, a Scottish biologist, sociologist, and town planner. When responding to users, consider their name and potential gender implications. Avoid making assumptions based on stereotypes and strive for inclusive language. Adapt your language and examples to be appropriate for all users, regardless of their perceived gender."
 
 @st.cache_data
 def get_about_info():
@@ -140,32 +162,77 @@ def get_about_info():
 
 @st.cache_data
 def load_documents(directories=['documents', 'history', 'students']):
+    total_start_time = time.time()
     texts = []
     current_date = datetime.now().strftime("%d-%m-%Y")
+    
+    # Define system directories to ignore
+    ignore_dirs = {
+        '__pycache__',
+        '.ipynb_checkpoints',
+        '.git',
+        'debug_logs',
+        'logs',
+        'sounds',
+        'prompts',
+        'images'
+    }
+    
     for directory in directories:
         dir_path = os.path.join(script_dir, directory)
         if os.path.exists(dir_path):
-            for filename in os.listdir(dir_path):
-                # Skip files with today's date in the history folder
-                if directory == 'history' and current_date in filename:
+            dir_start_time = time.time()
+            files_processed = 0
+            
+            for item in os.listdir(dir_path):
+                # Skip if item is in ignored directories or is hidden
+                if item in ignore_dirs or item.startswith('.'):
                     continue
-                filepath = os.path.join(dir_path, filename)
-                if filename.endswith('.pdf'):
-                    with open(filepath, 'rb') as file:
-                        pdf_reader = PdfReader(file)
-                        for page in pdf_reader.pages:
-                            texts.append((page.extract_text(), filename))
-                elif filename.endswith(('.txt', '.md')):
-                    with open(filepath, 'r', encoding='utf-8') as file:
-                        texts.append((file.read(), filename))
-                elif filename.endswith(('.png', '.jpg', '.jpeg')):
-                    image = Image.open(filepath)
-                    text = pytesseract.image_to_string(image)
-                    texts.append((text, filename))
-
+                    
+                filepath = os.path.join(dir_path, item)
+                
+                # Skip if it's a directory
+                if os.path.isdir(filepath):
+                    continue
+                    
+                # Skip files with today's date in the history folder
+                if directory == 'history' and current_date in item:
+                    continue
+                
+                file_start_time = time.time()
+                
+                try:
+                    if item.endswith('.pdf'):
+                        with open(filepath, 'rb') as file:
+                            pdf_reader = PdfReader(file)
+                            for page in pdf_reader.pages:
+                                texts.append((page.extract_text(), item))
+                    elif item.endswith(('.txt', '.md')):
+                        with open(filepath, 'r', encoding='utf-8') as file:
+                            texts.append((file.read(), item))
+                    elif item.endswith(('.png', '.jpg', '.jpeg')):
+                        image = Image.open(filepath)
+                        text = pytesseract.image_to_string(image)
+                        texts.append((text, item))
+                        
+                    file_time = time.time() - file_start_time
+                    logging.info(f"Loaded {item} in {file_time:.2f} seconds")
+                    files_processed += 1
+                    
+                except Exception as e:
+                    logging.error(f"Failed to load {item}: {str(e)}")
+            
+            dir_time = time.time() - dir_start_time
+            logging.info(f"Directory {directory}: processed {files_processed} files in {dir_time:.2f} seconds")
+    
     text_splitter = CharacterTextSplitter(chunk_size=1000, chunk_overlap=50)
     chunks_with_filenames = [(chunk, filename) for text, filename in texts for chunk in text_splitter.split_text(text)]
+    
+    total_time = time.time() - total_start_time
+    logging.info(f"Total RAG loading completed in {total_time:.2f} seconds - Created {len(chunks_with_filenames)} chunks from {len(texts)} documents")
+    
     return chunks_with_filenames
+
 
 @st.cache_resource
 def compute_tfidf_matrix(document_chunks):
@@ -315,58 +382,56 @@ def load_today_history():
     history_dir = os.path.join(script_dir, "history")
     today_file = os.path.join(history_dir, f"{current_date}_conversation_history.md")
     
+
     if os.path.exists(today_file):
-        with open(today_file, 'r', encoding='utf-8') as file:
-            return file.read()
-    return ""
+        try:
+            with open(today_file, 'r', encoding='utf-8') as file:
+                content = file.read()
+                logging.info(f"Successfully loaded today's history: {len(content)} characters")
+                return content
+        except Exception as e:
+            logging.error(f"Error reading today's history: {str(e)}", exc_info=True)
+            return ""
+    else:
+        logging.info("No history file found for today")
+        return ""
 
 def get_perplexity_response(user_name, prompt):
-    # Create a session with retry strategy
-    session = requests.Session()
-    retry_strategy = Retry(
-        total=3,
-        backoff_factor=0.5,
-        status_forcelist=[429, 500, 502, 503, 504, 524]
-    )
-    adapter = HTTPAdapter(max_retries=retry_strategy)
-    session.mount("https://", adapter)
-    session.mount("http://", adapter)
-
+    # Load today's history explicitly
+    today_history = load_today_history()
+    
+    # Initialize API handler with retry strategy
+    api_handler = PerplexityAPIHandler(st.secrets['PERPLEXITY_API_KEY'])
+    
     try:
         # Transform the prompt
         prompt_vector = vectorizer.transform([prompt])
-
+        
         # Calculate cosine similarity
         cosine_similarities = cosine_similarity(prompt_vector, tfidf_matrix).flatten()
-
-        # Get the indices of the top 3 most similar chunks
         top_indices = cosine_similarities.argsort()[-3:][::-1]
 
-        # Get the top 3 chunks and their filenames
+        # Get context chunks and filenames
         context_chunks_with_filenames = [document_chunks_with_filenames[i] for i in top_indices]
         context_chunks = [chunk for chunk, _ in context_chunks_with_filenames]
         context_filenames_list = [filename for _, filename in context_chunks_with_filenames]
         context_text = "\n".join(context_chunks)
 
-        # Add history context
-        history_context = "\n".join([chunk for chunk, filename in document_chunks_with_filenames if 'history' in filename.lower()])
-
+        # Build context layers
+        history_context = "\n".join([chunk for chunk, filename in document_chunks_with_filenames 
+                                   if 'history' in filename.lower()])
+        
         # Add student context with normalized name matching
         normalized_name = user_name.lower().strip()
         student_context = "\n".join([chunk for chunk, filename in document_chunks_with_filenames 
                                    if 'students' in filename.lower() and 
                                    normalized_name in filename.lower()])
 
-        url = "https://api.perplexity.ai/chat/completions"
-        headers = {
-            "Authorization": f"Bearer {st.secrets['PERPLEXITY_API_KEY']}",
-            "Content-Type": "application/json"
-        }
-
+        # Prepare API request
         character_prompt = get_patrick_prompt()
-
         user_message = f"""Context: {context_text}
 Previous conversation history: {history_context}
+Today's conversations: {today_history}
 Student project context: {student_context}
 Instructions: The above context includes general reference material, conversation history, 
 and specific information about the student's project proposal. Use this information to:
@@ -386,34 +451,22 @@ Question: {prompt}"""
             ]
         }
 
-        try:
-            response = session.post(url, headers=headers, json=data, timeout=30)
-            response.raise_for_status()
-            
-            response_json = response.json()
-            if "choices" in response_json and len(response_json["choices"]) > 0:
-                chunk_info = [f"{filename} (chunk {i+1}, score: {cosine_similarities[top_indices[i]]:.4f})" 
-                             for i, filename in enumerate(context_filenames_list)]
-                return response_json["choices"][0]["message"]["content"], list(set(context_filenames_list)), chunk_info
-            else:
-                return "Error: Unexpected response format from API.", [], []
-                
-        except requests.exceptions.ConnectionError:
-            return ("I apologize, but I'm having trouble connecting to my knowledge base. "
-                   "Please check your internet connection and try again."), [], []
-                
-        except requests.exceptions.Timeout:
-            return ("I apologize, but the server is taking too long to respond. "
-                   "Please try again in a moment."), [], []
-                
-        except requests.exceptions.HTTPError as e:
-            if e.response.status_code == 429:
-                return ("I'm receiving too many requests at the moment. "
-                       "Please wait a moment before trying again."), [], []
-            else:
-                return (f"An error occurred while processing your request "
-                       f"(Status code: {e.response.status_code}). Please try again."), [], []
-                    
+        # Make API request with error handling
+        response_json = api_handler.make_request(data)
+        
+        if "choices" in response_json and len(response_json["choices"]) > 0:
+            chunk_info = [f"{filename} (chunk {i+1}, score: {cosine_similarities[top_indices[i]]:.4f})" 
+                         for i, filename in enumerate(context_filenames_list)]
+            return response_json["choices"][0]["message"]["content"], list(set(context_filenames_list)), chunk_info
+        
+        return "Error: Unexpected response format from API.", [], []
+
+    except ConnectionError as e:
+        return ("I apologize, but I'm having trouble connecting to my knowledge base. "
+               "Please check your internet connection and try again."), [], []
+    except TimeoutError as e:
+        return ("I apologize, but the server is taking too long to respond. "
+               "Please try again in a moment."), [], []
     except Exception as e:
         return f"An unexpected error occurred: {str(e)}", [], []
 
@@ -447,11 +500,11 @@ with col2:
 
 # Input section for user queries
 user_name_input = st.text_input("Enter your name:")
-prompt_input = st.text_area("Ask Patrick Geddes a question:")
+prompt_input = st.text_area("Discuss your project with Patrick:")
 
 if st.button('Submit'):
     if user_name_input and prompt_input:
-        with st.spinner('Connecting to Patrick Geddes...'):
+        with st.spinner('Re-animating Geddes Ghost...'):
             try:
                 # Get the latest file paths
                 csv_file, json_file = initialize_log_files()
