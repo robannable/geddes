@@ -39,7 +39,13 @@ def load_response_data(logs_dir):
         if filename.endswith('_response_log.csv'):
             file_path = os.path.join(logs_dir, filename)
             try:
-                df = pd.read_csv(file_path, encoding='utf-8')
+                df = pd.read_csv(
+                file_path,
+                quoting=csv.QUOTE_ALL,  # Quote all fields
+                escapechar='\\',        # Use backslash as escape character
+                encoding='utf-8',       # Ensure proper encoding
+                on_bad_lines='warn'     # Warn about problematic lines instead of failing
+            )
                 # First try to parse as YYYY-MM-DD
                 try:
                     df['date'] = pd.to_datetime(df['date'], format='%Y-%m-%d')
