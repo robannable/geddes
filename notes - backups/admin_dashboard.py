@@ -36,26 +36,27 @@ def load_response_data(logs_dir):
     """Load and process all response logs with flexible date handling"""
     all_data = []
     
-    for filename in os.listdir(logs_dir):
-        if filename.endswith('_response_log.csv'):
-            file_path = os.path.join(logs_dir, filename)
-            try:
-                df = pd.read_csv(file_path, encoding='utf-8')
-                # First try to parse as YYYY-MM-DD
+    try:
+        for filename in os.listdir(logs_dir):
+            if filename.endswith('_response_log.csv'):
+                file_path = os.path.join(logs_dir, filename)
                 try:
-                    df['date'] = pd.to_datetime(df['date'], format='%Y-%m-%d')
-                except ValueError:
-                    # If that fails, try DD-MM-YYYY
+                    df = pd.read_csv(file_path, encoding='utf-8')
+                    # Convert date column
                     try:
-                        df['date'] = pd.to_datetime(df['date'], format='%d-%m-%Y', dayfirst=True)
+                        df['date'] = pd.to_datetime(df['date'], format='%Y-%m-%d')
                     except ValueError:
-                        # If both fail, use the mixed format parser
-                        df['date'] = pd.to_datetime(df['date'], format='mixed')
-                all_data.append(df)
-            except Exception as e:
-                st.error(f"Error processing {filename}: {str(e)}")
-                continue
-    
+                        try:
+                            df['date'] = pd.to_datetime(df['date'], format='%d-%m-%Y', dayfirst=True)
+                        except ValueError:
+                            df['date'] = pd.to_datetime(df['date'], format='mixed')
+                    all_data.append(df)
+                except Exception as e:
+                    logger.error(f"Error processing {filename}: {str(e)}")
+                    continue
+    except Exception as e:
+        logger.error(f"Error accessing logs directory: {str(e)}")
+        
     if all_data:
         return pd.concat(all_data, ignore_index=True)
     return pd.DataFrame()
