@@ -1,3 +1,27 @@
+"""
+Patrick Geddes AI Assistant System (PGAAS)
+----------------------------------------
+A Retrieval-Augmented Generation (RAG) implementation that simulates interactions
+with Patrick Geddes, the Scottish polymath. The system combines:
+
+- RAG-based knowledge retrieval from multiple document sources
+- Dynamic cognitive modes with temperature variation (0.7-0.9)
+- Context-aware response generation using Llama 3.1 70B
+- Comprehensive logging and response evaluation
+
+The system processes user queries through three main document categories:
+1. Authoritative documents (core knowledge)
+2. Historical records (past interactions)
+3. Student-specific content (personalized context)
+
+Responses are generated using a structured context assembly process and
+cognitive mode selection system that mimics Geddes' teaching approach.
+
+Author: Rob Annable
+Last Updated: 05-11-2024
+Version: 1.0
+"""
+
 import re
 import streamlit as st
 import requests
@@ -54,6 +78,14 @@ pygame.mixer.init()
 # Load sound file
 ding_sound = pygame.mixer.Sound(os.path.join(sound_dir, 'ding2.wav'))
 
+# Define constants at the top of the file
+CONTEXT_WEIGHTS = {
+    'student_specific': 1.5,  # Highest priority
+    'project': 1.3,          # Project-related content
+    'historical': 1.2,       # Historical context
+    'general': 1.0          # Base documents
+}
+
 # Add these classes after your existing imports but before any function definitions
 @dataclass
 class ContextItem:
@@ -66,12 +98,7 @@ class EnhancedContextManager:
     def __init__(self, max_memory_items: int = 10):
         self.max_memory_items = max_memory_items
         self.conversation_memory: List[ContextItem] = []
-        self.context_weights = {
-            'student_specific': 1.1,
-            'recent_conversation': 1.3,
-            'historical': 1.2,
-            'general': 1.4
-        }
+        self.context_weights = CONTEXT_WEIGHTS
     
     def add_conversation(self, content: str, source: str):
         context_item = ContextItem(
@@ -102,56 +129,77 @@ class EnhancedContextManager:
 
 class GeddesCognitiveModes:
     def __init__(self):
-        self.current_mode = 'survey'
         self.modes = {
             'survey': {
-                'weight': 1.5,
-                'temperature': 0.7,
                 'keywords': [
-                    'observe', 'analyze', 'examine', 
-                    'investigate', 'study', 'measure', 
-                    'document', 'assess'
+                    'what', 'describe', 'analyze', 'observe', 'examine', 'study',
+                    'investigate', 'explore', 'map', 'document', 'record', 'measure',
+                    'identify', 'catalogue', 'survey', 'inspect', 'review', 'assess',
+                    'where', 'when', 'who', 'which', 'look', 'find', 'discover'
                 ],
-                'prompt_prefix': "Let me first survey this situation as a biologist would..."
+                'prompt_prefix': 'Let us first survey and observe...',
+                'temperature': 0.7
             },
             'synthesis': {
-                'weight': 1.3,
-                'temperature': 0.8,
                 'keywords': [
-                    'connect', 'integrate', 'relate',  
-                    'combine', 'merge', 'unify', 
-                    'synthesize', 'blend'
+                    'how', 'connect', 'relate', 'integrate', 'combine', 'synthesize',
+                    'weave', 'blend', 'merge', 'link', 'bridge', 'join', 'unite',
+                    'pattern', 'relationship', 'network', 'system', 'structure',
+                    'framework', 'together', 'between', 'across', 'through',
+                    'interconnect', 'associate', 'correlate'
                 ],
-                'prompt_prefix': "Now, let us weave together these disparate threads..."
+                'prompt_prefix': 'Now, let us weave together these disparate threads...',
+                'temperature': 0.8
             },
             'proposition': {
-                'weight': 1.2,
-                'temperature': 0.9,
                 'keywords': [
-                    'propose', 'suggest', 'imagine', 
-                    'envision', 'innovate', 'create', 
-                    'design', 'transform'
+                    'why', 'propose', 'suggest', 'could', 'might', 'imagine',
+                    'envision', 'create', 'design', 'develop', 'innovate', 'transform',
+                    'improve', 'enhance', 'advance', 'future', 'potential', 'possible',
+                    'alternative', 'solution', 'strategy', 'plan', 'vision',
+                    'hypothesis', 'theory', 'concept'
                 ],
-                'prompt_prefix': "Consider this speculative intervention..."
+                'prompt_prefix': 'Let us venture forth with a proposition...',
+                'temperature': 0.9
             }
         }
-    
-    def determine_mode(self, query: str) -> str:
-        """Analyze query to determine appropriate cognitive mode"""
-        mode_scores = {
-            mode: sum(keyword in query.lower() for keyword in info['keywords'])
-            for mode, info in self.modes.items()
-        }
-        return max(mode_scores.items(), key=lambda x: x[1])[0]
-    
-    def get_mode_parameters(self, query: str) -> dict:
-        """Get parameters for the determined mode"""
-        mode = self.determine_mode(query)
-        self.current_mode = mode
+        logger.info("Initializing new GeddesCognitiveModes")
+
+    def get_mode_parameters(self, prompt: str) -> dict:
+        # Convert prompt to lowercase for matching
+        prompt_lower = prompt.lower()
+        
+        # Count keyword matches for each mode with weighted scoring
+        mode_scores = {}
+        for mode, params in self.modes.items():
+            # Count exact keyword matches
+            exact_matches = sum(
+                1 for keyword in params['keywords'] 
+                if f" {keyword} " in f" {prompt_lower} "  # Add spaces to ensure whole word matching
+            )
+            
+            # Count partial matches (for compound words or variations)
+            partial_matches = sum(
+                0.5 for keyword in params['keywords']
+                if keyword in prompt_lower and f" {keyword} " not in f" {prompt_lower} "
+            )
+            
+            # Combine scores
+            mode_scores[mode] = exact_matches + partial_matches
+        
+        # Select mode with highest score (default to 'survey' if tied or no matches)
+        selected_mode = max(
+            mode_scores.items(),
+            key=lambda x: (x[1], x[0] == 'survey')  # Prioritize survey mode in ties
+        )[0]
+        
+        # Log the selected mode and score
+        logger.info(f"Selected mode: {selected_mode} (score: {mode_scores[selected_mode]})")
+        
         return {
-            'temperature': self.modes[mode]['temperature'],
-            'weight': self.modes[mode]['weight'],
-            'prompt_prefix': self.modes[mode]['prompt_prefix']
+            'mode': selected_mode,
+            'prompt_prefix': self.modes[selected_mode]['prompt_prefix'],
+            'temperature': self.modes[selected_mode]['temperature']
         }
 
 # Set up API
@@ -346,27 +394,29 @@ document_chunks_with_filenames = load_documents(['documents', 'history', 'studen
 vectorizer, tfidf_matrix = compute_tfidf_matrix(document_chunks_with_filenames)
 
 # Add a context weighting system to prioritize different types of documents
-def weight_context_chunks(prompt, context_chunks_with_filenames, vectorizer, tfidf_matrix):
-    """Weight context chunks based on document type and relevance"""
+def weight_context_chunks(prompt, chunks_with_filenames, vectorizer, tfidf_matrix):
+    # Convert prompt to TF-IDF vector
     prompt_vector = vectorizer.transform([prompt])
-    base_similarities = cosine_similarity(prompt_vector, tfidf_matrix).flatten()
     
-    weighted_similarities = []
-    for i, (chunk, filename) in enumerate(context_chunks_with_filenames):
-        # Base similarity score
-        score = base_similarities[i]
-        
-        # Apply weights based on document type
-        if 'students' in filename.lower():
-            score *= 1.5  # Prioritize student-specific content
-        elif 'history' in filename.lower():
-            score *= 1.2  # Give preference to historical context
-        elif any(term in chunk.lower() for term in ['project', 'research', 'study']):
-            score *= 1.3  # Boost project-related content
-            
-        weighted_similarities.append(score)
+    # Compute cosine similarities
+    similarities = cosine_similarity(prompt_vector, tfidf_matrix).flatten()
     
-    return np.array(weighted_similarities)
+    # Apply weights based on document type using global constants
+    weighted_similarities = similarities.copy()
+    for i, (_, filename) in enumerate(chunks_with_filenames):
+        if "student_specific" in filename.lower():
+            weighted_similarities[i] *= CONTEXT_WEIGHTS['student_specific']
+        elif "project" in filename.lower():
+            weighted_similarities[i] *= CONTEXT_WEIGHTS['project']
+        elif "history" in filename.lower():
+            weighted_similarities[i] *= CONTEXT_WEIGHTS['historical']
+        else:
+            weighted_similarities[i] *= CONTEXT_WEIGHTS['general']
+    
+    # Log the weighting process
+    logger.info(f"Applied context weights: {CONTEXT_WEIGHTS}")
+    
+    return weighted_similarities
 
 def initialize_log_files():
     """Initialize or get existing log files"""
@@ -408,10 +458,19 @@ def update_chat_logs(user_name, question, response, unique_files, chunk_info, cs
     current_date = datetime.now().strftime("%Y-%m-%d")
     current_time = datetime.now().strftime("%H:%M:%S")
     
-    # Get evaluation metrics for CSV only
-    evaluation = st.session_state.response_evaluator._generate_evaluation_report()
+    # Get the current mode
+    mode_params = st.session_state.cognitive_modes.get_mode_parameters(question)
+    current_mode = mode_params['mode']
+    temperature = mode_params['temperature']
     
-    # Prepare CSV row with additional metrics
+    # Get evaluation with accumulated metrics
+    evaluation_results = st.session_state.response_evaluator.evaluate_response(
+        response=response,
+        mode=current_mode,
+        temperature=temperature
+    )
+    
+    # Prepare CSV row with full metrics
     csv_row = {
         'date': current_date,
         'time': current_time,
@@ -422,40 +481,48 @@ def update_chat_logs(user_name, question, response, unique_files, chunk_info, cs
         'chunk1_score': chunk_info[0] if len(chunk_info) > 0 else '',
         'chunk2_score': chunk_info[1] if len(chunk_info) > 1 else '',
         'chunk3_score': chunk_info[2] if len(chunk_info) > 2 else '',
-        'cognitive_mode': str(evaluation.get('mode_distribution', {})),
-        'response_length': len(response.split()),
-        'creative_markers': str(evaluation.get('creative_markers_frequency', {})),
-        'temperature': str(evaluation.get('temperature_effectiveness', {}))
+        'cognitive_mode': str(evaluation_results['mode_distribution']),
+        'response_length': evaluation_results['avg_response_length'],
+        'creative_markers': str(evaluation_results['creative_markers_frequency']),
+        'temperature': str(evaluation_results['temperature_effectiveness'])
     }
     
-    # Prepare JSON data (keeping original format)
-    json_data = {
+    # Write to CSV
+    fieldnames = list(csv_row.keys())
+    write_header = not os.path.exists(csv_file)
+    
+    with open(csv_file, mode='a', newline='', encoding='utf-8') as f:
+        writer = csv.DictWriter(f, fieldnames=fieldnames)
+        if write_header:
+            writer.writeheader()
+        writer.writerow(csv_row)
+    
+    # Prepare JSON entry
+    json_entry = {
         'date': current_date,
         'time': current_time,
         'name': user_name,
         'question': question,
         'response': response,
         'unique_files': unique_files,
-        'chunk_info': chunk_info
+        'chunk_info': chunk_info,
+        'cognitive_mode': current_mode,
+        'evaluation': evaluation_results
     }
     
-    # Write to CSV
+    # Update JSON file
     try:
-        with open(csv_file, 'a', newline='', encoding='utf-8') as f:
-            writer = csv.DictWriter(f, fieldnames=csv_row.keys())
-            writer.writerow(csv_row)
-    except Exception as e:
-        logger.error(f"Error writing to CSV: {str(e)}")
+        with open(json_file, 'r', encoding='utf-8') as f:
+            chat_history = json.load(f)
+    except (FileNotFoundError, json.JSONDecodeError):
+        chat_history = []
     
-    # Write to JSON (keeping original format)
-    try:
-        with open(json_file, 'a', encoding='utf-8') as f:
-            json.dump(json_data, f)
-            f.write('\n')
-    except Exception as e:
-        logger.error(f"Error writing to JSON: {str(e)}")
+    chat_history.append(json_entry)
     
-    return html.escape(response)
+    with open(json_file, 'w', encoding='utf-8') as f:
+        json.dump(chat_history, f, indent=2, ensure_ascii=False)
+    
+    return response
 
 def get_all_chat_history(user_name, logs_dir):
     history = []
@@ -608,8 +675,9 @@ def get_perplexity_response(user_name, prompt):
         today_history = load_today_history()
         api_handler = PerplexityAPIHandler(st.secrets['PERPLEXITY_API_KEY'])
         
-        # Get mode parameters
+        # Get mode parameters with explicit mode handling
         mode_params = st.session_state.cognitive_modes.get_mode_parameters(prompt)
+        selected_mode = mode_params.get('mode', 'survey')  # Default to survey if mode is missing
         
         # Get enhanced context structure
         rag_context = assemble_enhanced_context(
@@ -625,17 +693,17 @@ def get_perplexity_response(user_name, prompt):
         Based on the following authoritative sources and context, please provide a response:
 
         Authoritative Knowledge:
-        {' '.join(item['content'] for item in rag_context['authoritative'])}
+        {' '.join(chunk['content'] for chunk in rag_context['authoritative'])}
 
         Historical Context:
-        {' '.join(item['content'] for item in rag_context['historical'])}
+        {' '.join(chunk['content'] for chunk in rag_context['historical'])}
 
         Student-Specific Context:
-        {' '.join(item['content'] for item in rag_context['student_specific'])}
+        {' '.join(chunk['content'] for chunk in rag_context['student_specific'])}
 
         User's Question: {prompt}
         User's Name: {user_name}
-        Current Mode: {mode_params['prompt_prefix']}
+        Current Mode: {selected_mode}
         """
 
         # Prepare API request with structured prompt
@@ -654,6 +722,15 @@ def get_perplexity_response(user_name, prompt):
         if "choices" in response_json and len(response_json["choices"]) > 0:
             response_content = response_json["choices"][0]["message"]["content"]
             
+            # Log evaluation with explicit mode
+            logger.info(f"Starting response evaluation for mode: {selected_mode}")
+            evaluation_results = st.session_state.response_evaluator.evaluate_response(
+                response=response_content,
+                mode=selected_mode,  # Pass the explicit mode
+                temperature=mode_params['temperature']
+            )
+            logger.info(f"Evaluation results: {evaluation_results}")
+            
             # Create chunk info with scores
             chunk_info = [
                 f"{filename} (score: {weighted_similarities[idx]:.4f})" 
@@ -662,6 +739,7 @@ def get_perplexity_response(user_name, prompt):
             return response_content, unique_files, chunk_info
 
     except Exception as e:
+        logger.error(f"Error in get_perplexity_response: {str(e)}")
         return f"An unexpected error occurred: {str(e)}", [], []
 
 # Initialize session state objects

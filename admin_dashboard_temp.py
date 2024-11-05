@@ -35,37 +35,53 @@ logger = logging.getLogger(__name__)
 class ResponseEvaluator:
     def __init__(self):
         self.metrics = {
-            'mode_distribution': defaultdict(int),
-            'response_length': [],
-            'creative_markers': defaultdict(int),
-            'temperature_impact': defaultdict(list)
+            'mode_distribution': {'survey': 0, 'synthesis': 0, 'proposition': 0},
+            'response_lengths': [],
+            'creative_markers': {
+                'metaphor': 0,
+                'ecological_reference': 0,
+                'speculative_proposition': 0,
+                'cross-disciplinary': 0
+            },
+            'temperature_effectiveness': {0.7: [], 0.8: [], 0.9: []}
         }
-        self.creative_markers = [
-            'metaphor',
-            'cross-disciplinary',
-            'historical_parallel',
-            'ecological_reference',
-            'speculative_proposition'
-        ]
         logger.info("ResponseEvaluator initialized")
     
     def evaluate_response(self, response: str, mode: str, temperature: float) -> dict:
-        """Analyze response characteristics and update metrics"""
-        logger.info(f"Evaluating response - Mode: {mode}, Temp: {temperature}")
+        # Update mode distribution
+        self.metrics['mode_distribution'][mode] = self.metrics['mode_distribution'].get(mode, 0) + 1
         
-        # Update metrics
-        self.metrics['mode_distribution'][mode] += 1
-        words = len(response.split())
-        self.metrics['response_length'].append(words)
+        # Update response length
+        response_length = len(response.split())
+        self.metrics['response_lengths'].append(response_length)
         
-        for marker in self.creative_markers:
-            if self._check_creative_marker(response, marker):
-                self.metrics['creative_markers'][marker] += 1
+        # Update temperature effectiveness
+        if temperature in self.metrics['temperature_effectiveness']:
+            self.metrics['temperature_effectiveness'][temperature].append(response_length)
         
-        self.metrics['temperature_impact'][temperature].append(words)
+        # Analyze for creative markers
+        lower_response = response.lower()
+        if any(word in lower_response for word in ['like', 'as', 'metaphor', 'akin']):
+            self.metrics['creative_markers']['metaphor'] += 1
+        if any(word in lower_response for word in ['ecology', 'nature', 'environment', 'organic']):
+            self.metrics['creative_markers']['ecological_reference'] += 1
+        if any(word in lower_response for word in ['could', 'might', 'suggest', 'propose']):
+            self.metrics['creative_markers']['speculative_proposition'] += 1
+        if any(word in lower_response for word in ['across', 'between', 'integrate', 'combine']):
+            self.metrics['creative_markers']['cross-disciplinary'] += 1
         
-        logger.info(f"Updated metrics - Modes: {dict(self.metrics['mode_distribution'])}")
-        return self._generate_evaluation_report()
+        # Calculate averages for temperature effectiveness
+        temp_effectiveness = {
+            temp: sum(lengths) / len(lengths) if lengths else 0
+            for temp, lengths in self.metrics['temperature_effectiveness'].items()
+        }
+        
+        return {
+            'mode_distribution': self.metrics['mode_distribution'],
+            'avg_response_length': sum(self.metrics['response_lengths']) / len(self.metrics['response_lengths']),
+            'creative_markers_frequency': dict(self.metrics['creative_markers']),
+            'temperature_effectiveness': temp_effectiveness
+        }
     
     def _check_creative_marker(self, response: str, marker: str) -> bool:
         """Check for presence of creative markers in response"""
@@ -82,11 +98,11 @@ class ResponseEvaluator:
         """Generate summary report of metrics"""
         return {
             'mode_distribution': dict(self.metrics['mode_distribution']),
-            'avg_response_length': np.mean(self.metrics['response_length']),
+            'avg_response_length': np.mean(self.metrics['response_lengths']),
             'creative_markers_frequency': dict(self.metrics['creative_markers']),
             'temperature_effectiveness': {
                 temp: np.mean(lengths)
-                for temp, lengths in self.metrics['temperature_impact'].items()
+                for temp, lengths in self.metrics['temperature_effectiveness'].items()
             }
         }
 
