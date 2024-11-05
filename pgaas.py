@@ -67,10 +67,10 @@ class EnhancedContextManager:
         self.max_memory_items = max_memory_items
         self.conversation_memory: List[ContextItem] = []
         self.context_weights = {
-            'student_specific': 1.5,
+            'student_specific': 1.1,
             'recent_conversation': 1.3,
             'historical': 1.2,
-            'general': 1.0
+            'general': 1.4
         }
     
     def add_conversation(self, content: str, source: str):
@@ -107,19 +107,31 @@ class GeddesCognitiveModes:
             'survey': {
                 'weight': 1.5,
                 'temperature': 0.7,
-                'keywords': ['observe', 'analyze', 'examine'],
+                'keywords': [
+                    'observe', 'analyze', 'examine', 
+                    'investigate', 'study', 'measure', 
+                    'document', 'assess'
+                ],
                 'prompt_prefix': "Let me first survey this situation as a biologist would..."
             },
             'synthesis': {
                 'weight': 1.3,
                 'temperature': 0.8,
-                'keywords': ['connect', 'integrate', 'relate'],
+                'keywords': [
+                    'connect', 'integrate', 'relate',  
+                    'combine', 'merge', 'unify', 
+                    'synthesize', 'blend'
+                ],
                 'prompt_prefix': "Now, let us weave together these disparate threads..."
             },
             'proposition': {
                 'weight': 1.2,
                 'temperature': 0.9,
-                'keywords': ['propose', 'suggest', 'imagine'],
+                'keywords': [
+                    'propose', 'suggest', 'imagine', 
+                    'envision', 'innovate', 'create', 
+                    'design', 'transform'
+                ],
                 'prompt_prefix': "Consider this speculative intervention..."
             }
         }
