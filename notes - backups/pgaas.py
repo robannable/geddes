@@ -1,9 +1,4 @@
-import streamlit as st
-import requests
-import json
-import pygame
-import os
-import csv
+import re
 import streamlit as st
 import requests
 import json
@@ -11,6 +6,8 @@ import pygame
 import os
 import csv
 from datetime import datetime
+from dataclasses import dataclass
+from typing import List, Dict
 from pypdf import PdfReader
 from langchain.text_splitter import CharacterTextSplitter
 import pytesseract
@@ -30,18 +27,21 @@ script_dir = os.path.dirname(os.path.abspath(__file__))
 import logging
 import time
 
-# Set up minimal logging for document loading only
+# Set up logging
 log_dir = os.path.join(script_dir, "debug_logs")
 os.makedirs(log_dir, exist_ok=True)
 current_date = datetime.now().strftime("%d-%m-%Y")
 log_file = os.path.join(log_dir, f"{current_date}_rag_loading.log")
 
+# Configure logging
 logging.basicConfig(
     filename=log_file,
     level=logging.INFO,
-    format='%(asctime)s - RAG Loading - %(message)s',
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
     encoding='utf-8'
 )
+
+logger = logging.getLogger(__name__)  # Add this line to create the logger instance
 
 # Initialize directories
 sound_dir = os.path.join(script_dir, 'sounds')
@@ -53,6 +53,106 @@ pygame.mixer.init()
 
 # Load sound file
 ding_sound = pygame.mixer.Sound(os.path.join(sound_dir, 'ding2.wav'))
+
+# Add these classes after your existing imports but before any function definitions
+@dataclass
+class ContextItem:
+    content: str
+    timestamp: datetime  # Changed from datetime.datetime
+    source: str
+    relevance_score: float = 0.0
+
+class EnhancedContextManager:
+    def __init__(self, max_memory_items: int = 10):
+        self.max_memory_items = max_memory_items
+        self.conversation_memory: List[ContextItem] = []
+        self.context_weights = {
+            'student_specific': 1.1,
+            'recent_conversation': 1.3,
+            'historical': 1.2,
+            'general': 1.4
+        }
+    
+    def add_conversation(self, content: str, source: str):
+        context_item = ContextItem(
+            content=content,
+            timestamp=datetime.now(),  # Changed from datetime.datetime.now()
+            source=source
+        )
+        self.conversation_memory.append(context_item)
+        if len(self.conversation_memory) > self.max_memory_items:
+            self.conversation_memory.pop(0)
+    
+    def get_weighted_context(self, query: str, user_name: str) -> Dict[str, List[ContextItem]]:
+        categorized_context = {
+            'student_specific': [],
+            'recent_conversation': [],
+            'historical': [],
+            'general': []
+        }
+        
+        # Categorize conversation memory
+        for item in self.conversation_memory:
+            if user_name.lower() in item.source.lower():
+                categorized_context['student_specific'].append(item)
+            else:
+                categorized_context['recent_conversation'].append(item)
+        
+        return categorized_context
+
+class GeddesCognitiveModes:
+    def __init__(self):
+        self.current_mode = 'survey'
+        self.modes = {
+            'survey': {
+                'weight': 1.5,
+                'temperature': 0.7,
+                'keywords': [
+                    'observe', 'analyze', 'examine', 
+                    'investigate', 'study', 'measure', 
+                    'document', 'assess'
+                ],
+                'prompt_prefix': "Let me first survey this situation as a biologist would..."
+            },
+            'synthesis': {
+                'weight': 1.3,
+                'temperature': 0.8,
+                'keywords': [
+                    'connect', 'integrate', 'relate',  
+                    'combine', 'merge', 'unify', 
+                    'synthesize', 'blend'
+                ],
+                'prompt_prefix': "Now, let us weave together these disparate threads..."
+            },
+            'proposition': {
+                'weight': 1.2,
+                'temperature': 0.9,
+                'keywords': [
+                    'propose', 'suggest', 'imagine', 
+                    'envision', 'innovate', 'create', 
+                    'design', 'transform'
+                ],
+                'prompt_prefix': "Consider this speculative intervention..."
+            }
+        }
+    
+    def determine_mode(self, query: str) -> str:
+        """Analyze query to determine appropriate cognitive mode"""
+        mode_scores = {
+            mode: sum(keyword in query.lower() for keyword in info['keywords'])
+            for mode, info in self.modes.items()
+        }
+        return max(mode_scores.items(), key=lambda x: x[1])[0]
+    
+    def get_mode_parameters(self, query: str) -> dict:
+        """Get parameters for the determined mode"""
+        mode = self.determine_mode(query)
+        self.current_mode = mode
+        return {
+            'temperature': self.modes[mode]['temperature'],
+            'weight': self.modes[mode]['weight'],
+            'prompt_prefix': self.modes[mode]['prompt_prefix']
+        }
 
 # Set up API
 class PerplexityAPIHandler:
@@ -245,33 +345,48 @@ def compute_tfidf_matrix(document_chunks):
 document_chunks_with_filenames = load_documents(['documents', 'history', 'students'])
 vectorizer, tfidf_matrix = compute_tfidf_matrix(document_chunks_with_filenames)
 
+# Add a context weighting system to prioritize different types of documents
+def weight_context_chunks(prompt, context_chunks_with_filenames, vectorizer, tfidf_matrix):
+    """Weight context chunks based on document type and relevance"""
+    prompt_vector = vectorizer.transform([prompt])
+    base_similarities = cosine_similarity(prompt_vector, tfidf_matrix).flatten()
+    
+    weighted_similarities = []
+    for i, (chunk, filename) in enumerate(context_chunks_with_filenames):
+        # Base similarity score
+        score = base_similarities[i]
+        
+        # Apply weights based on document type
+        if 'students' in filename.lower():
+            score *= 1.5  # Prioritize student-specific content
+        elif 'history' in filename.lower():
+            score *= 1.2  # Give preference to historical context
+        elif any(term in chunk.lower() for term in ['project', 'research', 'study']):
+            score *= 1.3  # Boost project-related content
+            
+        weighted_similarities.append(score)
+    
+    return np.array(weighted_similarities)
+
 def initialize_log_files():
+    """Initialize or get existing log files"""
+    current_date = datetime.now().strftime("%d-%m-%Y")
     logs_dir = os.path.join(script_dir, "logs")
     os.makedirs(logs_dir, exist_ok=True)
-    current_date = datetime.now().strftime("%d-%m-%Y")
+    
     csv_file = os.path.join(logs_dir, f"{current_date}_response_log.csv")
     json_file = os.path.join(logs_dir, f"{current_date}_response_log.json")
-
+    
+    # Initialize CSV if it doesn't exist
     if not os.path.exists(csv_file):
-        with open(csv_file, 'w', newline='') as f:
-            writer = csv.writer(f)
-            writer.writerow(['name', 'date', 'time', 'question', 'response', 'unique_files', 'chunk1_score', 'chunk2_score', 'chunk3_score'])
-
-    if not os.path.exists(json_file):
-        with open(json_file, 'w') as f:
-            json.dump([], f)
-    else:
-        with open(json_file, 'r+') as f:
-            try:
-                logs = json.load(f)
-                if not isinstance(logs, list):
-                    logs = []
-            except json.JSONDecodeError:
-                logs = []
-            f.seek(0)
-            json.dump(logs, f)
-            f.truncate()
-
+        with open(csv_file, 'w', newline='', encoding='utf-8') as f:
+            writer = csv.DictWriter(f, fieldnames=[
+                'date', 'time', 'name', 'question', 'response', 
+                'unique_files', 'chunk1_score', 'chunk2_score', 'chunk3_score',
+                'cognitive_mode', 'response_length', 'creative_markers', 'temperature'
+            ])
+            writer.writeheader()
+    
     return csv_file, json_file
 
 def write_markdown_history(user_name, question, response, csv_file):
@@ -289,93 +404,99 @@ def write_markdown_history(user_name, question, response, csv_file):
         f.write("---\n\n")
 
 def update_chat_logs(user_name, question, response, unique_files, chunk_info, csv_file, json_file):
-    now = datetime.now()
-    date = now.strftime("%d-%m-%Y")
-    time = now.strftime("%H:%M:%S")
-
-    # Store raw data for logging
-    raw_response = response
-    # HTML escape only for web output (not for logging)
-    encoded_response = html.escape(response)
-
-    # Use raw data for unique files and chunk info
-    unique_files_str = " - ".join(unique_files)
-
-    # Parse chunk_info to extract scores and filenames (using raw data)
-    chunk_scores = []
-    for chunk in chunk_info:
-        try:
-            parts = chunk.split(', score: ')
-            if len(parts) == 2:
-                score = float(parts[1].strip(')'))
-                filename = parts[0].split(' (chunk ')[0]
-                chunk_scores.append(f"{score:.4f} - {filename}")
-            else:
-                chunk_scores.append(chunk)
-        except Exception as e:
-            st.warning(f"Error parsing chunk info: {e}")
-            chunk_scores.append(chunk)
-
-    # Ensure we always have 3 entries, even if there are fewer chunks
-    while len(chunk_scores) < 3:
-        chunk_scores.append("")
-
-    # Write to markdown history
-    write_markdown_history(user_name, question, raw_response, csv_file)
-
-    # Write raw data to CSV log
-    with open(csv_file, 'a', newline='') as f:
-        writer = csv.writer(f)
-        row = [user_name, date, time, question, raw_response, unique_files_str] + chunk_scores
-        writer.writerow(row)
-
-    # Write raw data to JSON log
-    with open(json_file, 'r+') as f:
-        try:
-            logs = json.load(f)
-            if not isinstance(logs, list):
-                logs = []
-        except json.JSONDecodeError:
-            logs = []
-        logs.append({
-            "name": user_name,
-            "date": date,
-            "time": time,
-            "question": question,
-            "response": raw_response,
-            "unique_files": unique_files,
-            "chunk_info": chunk_info
-        })
-        f.seek(0)
-        json.dump(logs, f, indent=4)
-        f.truncate()
-
-    # Return the encoded response for web output
-    return encoded_response
+    """Update both CSV and JSON logs with chat data"""
+    current_date = datetime.now().strftime("%Y-%m-%d")
+    current_time = datetime.now().strftime("%H:%M:%S")
+    
+    # Get evaluation metrics for CSV only
+    evaluation = st.session_state.response_evaluator._generate_evaluation_report()
+    
+    # Prepare CSV row with additional metrics
+    csv_row = {
+        'date': current_date,
+        'time': current_time,
+        'name': user_name,
+        'question': question,
+        'response': response,
+        'unique_files': ' - '.join(unique_files),
+        'chunk1_score': chunk_info[0] if len(chunk_info) > 0 else '',
+        'chunk2_score': chunk_info[1] if len(chunk_info) > 1 else '',
+        'chunk3_score': chunk_info[2] if len(chunk_info) > 2 else '',
+        'cognitive_mode': str(evaluation.get('mode_distribution', {})),
+        'response_length': len(response.split()),
+        'creative_markers': str(evaluation.get('creative_markers_frequency', {})),
+        'temperature': str(evaluation.get('temperature_effectiveness', {}))
+    }
+    
+    # Prepare JSON data (keeping original format)
+    json_data = {
+        'date': current_date,
+        'time': current_time,
+        'name': user_name,
+        'question': question,
+        'response': response,
+        'unique_files': unique_files,
+        'chunk_info': chunk_info
+    }
+    
+    # Write to CSV
+    try:
+        with open(csv_file, 'a', newline='', encoding='utf-8') as f:
+            writer = csv.DictWriter(f, fieldnames=csv_row.keys())
+            writer.writerow(csv_row)
+    except Exception as e:
+        logger.error(f"Error writing to CSV: {str(e)}")
+    
+    # Write to JSON (keeping original format)
+    try:
+        with open(json_file, 'a', encoding='utf-8') as f:
+            json.dump(json_data, f)
+            f.write('\n')
+    except Exception as e:
+        logger.error(f"Error writing to JSON: {str(e)}")
+    
+    return html.escape(response)
 
 def get_all_chat_history(user_name, logs_dir):
     history = []
     for filename in os.listdir(logs_dir):
         if filename.endswith('_response_log.csv'):
             file_path = os.path.join(logs_dir, filename)
-            with open(file_path, 'r') as f:
-                reader = csv.reader(f)
-                next(reader)  # Skip header row
-                for row in reader:
-                    if row[0] == user_name:
-                        history.append({
-                            "name": row[0],
-                            "date": row[1] if len(row) > 1 else "",
-                            "time": row[2] if len(row) > 2 else "",
-                            "question": row[3] if len(row) > 3 else "",
-                            "response": row[4] if len(row) > 4 else "",
-                            "unique_files": row[5] if len(row) > 5 else "",
-                            "chunk_info": [
-                                row[6] if len(row) > 6 else "",
-                                row[7] if len(row) > 7 else "",
-                                row[8] if len(row) > 8 else ""]
-                        })
-    return sorted(history, key=lambda x: (x['date'], x['time']), reverse=True)
+            try:
+                with open(file_path, 'r', encoding='utf-8-sig') as f:
+                    reader = csv.DictReader(f)  # Changed to DictReader
+                    for row in reader:
+                        # Update date parsing to handle both formats
+                        try:
+                            date = datetime.strptime(row['date'], '%d-%m-%Y').strftime('%d-%m-%Y')
+                        except ValueError:
+                            try:
+                                date = datetime.strptime(row['date'], '%Y-%m-%d').strftime('%d-%m-%Y')
+                            except ValueError:
+                                continue
+                            
+                        if row['name'] == user_name:
+                            history.append({
+                                "name": row['name'],
+                                "date": date,
+                                "time": row.get('time', ""),
+                                "question": row.get('question', ""),
+                                "response": row.get('response', ""),
+                                "unique_files": row.get('unique_files', ""),
+                                "chunk_info": [
+                                    row.get('chunk1_score', ""),
+                                    row.get('chunk2_score', ""),
+                                    row.get('chunk3_score', "")
+                                ]
+                            })
+            except Exception as e:
+                logger.error(f"Error reading file {file_path}: {str(e)}")
+                continue
+                
+    return sorted(history, key=lambda x: (
+        datetime.strptime(x['date'], '%d-%m-%Y'),
+        x['time']
+    ), reverse=True)
 
 def load_today_history():
     current_date = datetime.now().strftime("%d-%m-%Y")
@@ -395,15 +516,117 @@ def load_today_history():
     else:
         logging.info("No history file found for today")
         return ""
+    
+def get_temporal_context(today_history, max_history_chunks=5):
+    """Process conversation history with temporal weighting"""
+    history_chunks = today_history.split("##")
+    
+    # Sort chunks by timestamp (assuming they start with timestamp)
+    history_chunks.sort(key=lambda x: x.split("|")[0] if "|" in x else "", reverse=True)
+    
+    # Take most recent chunks and apply temporal weighting
+    recent_chunks = []
+    for i, chunk in enumerate(history_chunks[:max_history_chunks]):
+        temporal_weight = 1 / (i + 1)  # More recent = higher weight
+        recent_chunks.append({
+            'content': chunk,
+            'weight': temporal_weight
+        })
+    
+    return recent_chunks    
+
+def assemble_enhanced_context(
+    user_name: str,
+    prompt: str,
+    context_manager: EnhancedContextManager,
+    top_chunks: List[tuple],
+    today_history: str
+) -> str:
+    """
+    Assembles context with improved structure and weighting
+    
+    Args:
+        user_name: Name of the current user
+        prompt: Current user query
+        context_manager: Instance of EnhancedContextManager
+        top_chunks: List of (chunk, filename) tuples from RAG
+        today_history: Today's conversation history
+    
+    Returns:
+        Structured context string for the LLM
+    """
+    # Get weighted context from memory
+    categorized_context = context_manager.get_weighted_context(prompt, user_name)
+    
+    # Process RAG chunks
+    for chunk, filename in top_chunks:
+        context_item = ContextItem(
+            content=chunk,
+            timestamp=datetime.now(),
+            source=filename
+        )
+        
+        if user_name.lower() in filename.lower():
+            categorized_context['student_specific'].append(context_item)
+        elif 'history' in filename.lower():
+            categorized_context['historical'].append(context_item)
+        else:
+            categorized_context['general'].append(context_item)
+    
+    # Assemble final context
+    context_sections = []
+    
+    # Student-specific context (highest priority)
+    if categorized_context['student_specific']:
+        context_sections.append("Student-Specific Context:")
+        context_sections.extend([
+            f"- {item.content}" 
+            for item in categorized_context['student_specific'][:3]
+        ])
+    
+    # Recent conversations
+    if categorized_context['recent_conversation']:
+        context_sections.append("\nRecent Relevant Discussions:")
+        context_sections.extend([
+            f"- {item.content}" 
+            for item in sorted(
+                categorized_context['recent_conversation'],
+                key=lambda x: x.timestamp,
+                reverse=True
+            )[:3]
+        ])
+    
+    # Historical context
+    if categorized_context['historical']:
+        context_sections.append("\nHistorical Background:")
+        context_sections.extend([
+            f"- {item.content}" 
+            for item in categorized_context['historical'][:2]
+        ])
+    
+    # General knowledge
+    if categorized_context['general']:
+        context_sections.append("\nGeneral Reference:")
+        context_sections.extend([
+            f"- {item.content}" 
+            for item in categorized_context['general'][:2]
+        ])
+    
+    return "\n".join(context_sections)
 
 def get_perplexity_response(user_name, prompt):
-    # Load today's history explicitly
-    today_history = load_today_history()
-    
-    # Initialize API handler with retry strategy
-    api_handler = PerplexityAPIHandler(st.secrets['PERPLEXITY_API_KEY'])
-    
     try:
+        today_history = load_today_history()
+        api_handler = PerplexityAPIHandler(st.secrets['PERPLEXITY_API_KEY'])
+        
+        # Initialize cognitive modes if not in session state
+        if 'cognitive_modes' not in st.session_state:
+            st.session_state.cognitive_modes = GeddesCognitiveModes()
+        
+        # Get current mode and parameters
+        current_mode = st.session_state.cognitive_modes.determine_mode(prompt)  # Get the actual mode name
+        mode_params = st.session_state.cognitive_modes.get_mode_parameters(prompt)
+
         # Transform the prompt
         prompt_vector = vectorizer.transform([prompt])
         
@@ -415,51 +638,71 @@ def get_perplexity_response(user_name, prompt):
         context_chunks_with_filenames = [document_chunks_with_filenames[i] for i in top_indices]
         context_chunks = [chunk for chunk, _ in context_chunks_with_filenames]
         context_filenames_list = [filename for _, filename in context_chunks_with_filenames]
-        context_text = "\n".join(context_chunks)
-
-        # Build context layers
-        history_context = "\n".join([chunk for chunk, filename in document_chunks_with_filenames 
-                                   if 'history' in filename.lower()])
         
-        # Add student context with normalized name matching
-        normalized_name = user_name.lower().strip()
-        student_context = "\n".join([chunk for chunk, filename in document_chunks_with_filenames 
-                                   if 'students' in filename.lower() and 
-                                   normalized_name in filename.lower()])
-
+        # Get enhanced context
+        enhanced_context = assemble_enhanced_context(
+            user_name=user_name,
+            prompt=prompt,
+            context_manager=st.session_state.context_manager,
+            top_chunks=context_chunks_with_filenames,
+            today_history=today_history
+        )
+        
+        # Update context memory
+        st.session_state.context_manager.add_conversation(
+            content=prompt,
+            source=f"user_{user_name}"
+        )
+        
         # Prepare API request
         character_prompt = get_patrick_prompt()
-        user_message = f"""Context: {context_text}
-Previous conversation history: {history_context}
-Today's conversations: {today_history}
-Student project context: {student_context}
-Instructions: The above context includes general reference material, conversation history, 
-and specific information about the student's project proposal. Use this information to:
-1. Provide responses that connect to the student's specific project interests
-2. Draw parallels between historical concepts and the student's research
-3. Maintain consistency with previous conversations
-4. Suggest relevant connections between their project and Geddes' work
-User's name: {user_name}
-Current date: {datetime.now().strftime("%d-%m-%Y")}
-Question: {prompt}"""
+        user_message = f"""
+        Enhanced Context: {enhanced_context}
+        User's name: {user_name}
+        Current date: {datetime.now().strftime("%d-%m-%Y")}
+        Cognitive Mode: {mode_params['prompt_prefix']}
+        Question: {prompt}
+        """
 
         data = {
             "model": "llama-3.1-70b-instruct",
             "messages": [
                 {"role": "system", "content": character_prompt},
-                {"role": "user", "content": user_message}
-            ]
-        }
+                {"role": "user", "content": f"{mode_params['prompt_prefix']}\n{user_message}"}
+            ],
+            "temperature": mode_params['temperature']
+}
 
         # Make API request with error handling
         response_json = api_handler.make_request(data)
         
         if "choices" in response_json and len(response_json["choices"]) > 0:
-            chunk_info = [f"{filename} (chunk {i+1}, score: {cosine_similarities[top_indices[i]]:.4f})" 
-                         for i, filename in enumerate(context_filenames_list)]
-            return response_json["choices"][0]["message"]["content"], list(set(context_filenames_list)), chunk_info
-        
-        return "Error: Unexpected response format from API.", [], []
+            response_content = response_json["choices"][0]["message"]["content"]
+            
+            # Add detailed logging for response evaluation
+            logger.info(f"Response generated for mode: {current_mode}")
+            
+            # Evaluate response quality with correct mode name
+            if hasattr(st, 'session_state') and 'response_evaluator' in st.session_state:
+                logger.info("Starting response evaluation")
+                try:
+                    evaluation = st.session_state.response_evaluator.evaluate_response(
+                        response=response_content,
+                        mode=current_mode,
+                        temperature=mode_params['temperature']
+                    )
+                    logger.info(f"Evaluation results: {evaluation}")
+                except Exception as e:
+                    logger.error(f"Error in response evaluation: {str(e)}", exc_info=True)
+            else:
+                logger.warning("ResponseEvaluator not found in session state")
+            
+            # Create chunk info with scores
+            chunk_info = [
+                f"{filename} (chunk {i+1}, score: {cosine_similarities[top_indices[i]]:.4f})" 
+                for i, filename in enumerate(context_filenames_list)
+            ]
+            return response_content, context_filenames_list, chunk_info
 
     except ConnectionError as e:
         return ("I apologize, but I'm having trouble connecting to my knowledge base. "
@@ -470,6 +713,14 @@ Question: {prompt}"""
     except Exception as e:
         return f"An unexpected error occurred: {str(e)}", [], []
 
+if 'context_manager' not in st.session_state:
+    st.session_state.context_manager = EnhancedContextManager()
+
+# Initialize session state objects
+if 'response_evaluator' not in st.session_state:
+    logger.info("Initializing new ResponseEvaluator")
+    from admin_dashboard_temp import ResponseEvaluator
+    st.session_state.response_evaluator = ResponseEvaluator()
 
 # Streamlit UI
 st.title("The Ghost of Geddes...")
@@ -529,6 +780,14 @@ if st.button('Submit'):
                     chunk_info=chunk_info,
                     csv_file=csv_file,
                     json_file=json_file
+                )
+
+                # Add this line to write markdown history
+                write_markdown_history(
+                    user_name=user_name_input.strip(),
+                    question=prompt_input.strip(),
+                    response=response_content,
+                    csv_file=csv_file
                 )
 
                 # Play sound only on successful response
